@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生徒総会 投票結果集計システム [Windows NT 4.0]</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        body {
+            font-family: Tahoma, 'MS UI Gothic', 'MS P Gothic', sans-serif;
+            -webkit-font-smoothing: none;
+            background-color: #008080;
+            image-rendering: pixelated;
+            font-size: 12px;
+        }
+        
+        .win-outset {
+            background: #c0c0c0;
+            border-top: 2px solid #ffffff;
+            border-left: 2px solid #ffffff;
+            border-right: 2px solid #808080;
+            border-bottom: 2px solid #808080;
+            box-shadow: 1px 1px 0px 0px #000000;
+        }
+
+        .win-inset {
+            background: #ffffff;
+            border-top: 2px solid #808080;
+            border-left: 2px solid #808080;
+            border-right: 2px solid #ffffff;
+            border-bottom: 2px solid #ffffff;
+        }
+
+        .win-btn {
+            background: #c0c0c0;
+            border-top: 1.5px solid #ffffff;
+            border-left: 1.5px solid #ffffff;
+            border-right: 1.5px solid #808080;
+            border-bottom: 1.5px solid #808080;
+            box-shadow: 0.5px 0.5px 0px 0px #000000;
+        }
+        .win-btn:active {
+            border-top: 1.5px solid #808080;
+            border-left: 1.5px solid #808080;
+            border-right: 1.5px solid #ffffff;
+            border-bottom: 1.5px solid #ffffff;
+            padding-top: 2px;
+            padding-left: 2px;
+        }
+
+        .win-titlebar {
+            background: linear-gradient(90deg, 
+                #000080 0%, #000080 14%,
+                #08249b 14%, #08249b 28%,
+                #0d41b1 28%, #0d41b1 42%,
+                #115ac4 42%, #115ac4 57%,
+                #1571d4 57%, #1571d4 71%,
+                #1987e2 71%, #1987e2 85%,
+                #1d9cee 85%, #1d9cee 100%
+            );
+            color: #ffffff;
+            padding: 2px 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .win-groupbox {
+            border: 2px solid #ffffff;
+            border-top-color: #808080;
+            border-left-color: #808080;
+            padding: 10px;
+            margin-top: 12px;
+            position: relative;
+        }
+        .win-groupbox legend {
+            padding: 0 4px;
+            background-color: #c0c0c0;
+            position: absolute;
+            top: -8px;
+            left: 8px;
+            font-size: 12px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 16px;
+            height: 16px;
+            background: #dfdfdf;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c0c0c0;
+            border-top: 1.5px solid #ffffff;
+            border-left: 1.5px solid #ffffff;
+            border-right: 1.5px solid #808080;
+            border-bottom: 1.5px solid #808080;
+        }
+        ::-webkit-scrollbar-track {
+            background-image: radial-gradient(#c0c0c0 25%, transparent 25%), radial-gradient(#ffffff 25%, transparent 25%);
+            background-size: 4px 4px;
+            background-position: 0 0, 2px 2px;
+            background-color: #dfdfdf;
+        }
+
+        .win-progress-track {
+            background-color: #c0c0c0;
+            box-shadow: inset 1px 1px 0px #808080, inset -1px -1px 0px #ffffff;
+            padding: 2px;
+        }
+        .win-chunk-blue {
+            background-image: linear-gradient(90deg, #000080 0px, #000080 10px, transparent 10px, transparent 12px);
+            background-size: 12px 100%;
+        }
+        .win-chunk-red {
+            background-image: linear-gradient(90deg, #800000 0px, #800000 10px, transparent 10px, transparent 12px);
+            background-size: 12px 100%;
+        }
+        .win-chunk-gray {
+            background-image: linear-gradient(90deg, #808080 0px, #808080 10px, transparent 10px, transparent 12px);
+            background-size: 12px 100%;
+        }
+    </style>
+</head>
+<body class="p-4 min-h-screen text-black overflow-x-hidden">
+
+    <div class="w-full max-w-[1400px] mx-auto space-y-4">
+        
+        <header class="win-outset flex items-center justify-between p-1.5 mb-2">
+            <div class="flex items-center gap-2">
+                <i class="ph-bold ph-monitor text-xl text-blue-900"></i>
+                <div class="font-bold">
+                    <span class="text-slate-700">生徒会管理コンソール -</span> 
+                    <span class="text-blue-900">投票結果集計ビューアー [Version 4.0]</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 text-slate-700 font-mono text-xs pr-2" id="systemClock">
+                2026-07-15 15:00:00 JST
+            </div>
+        </header>
+
+        <div id="statusAlert" class="win-outset p-2 hidden flex items-start gap-2 bg-[#ffffcc] border-l-4 border-yellow-600">
+            <i class="ph-fill ph-info text-yellow-700 text-lg"></i>
+            <div>
+                <span class="font-bold block">システムアナウンスメント:</span>
+                <span id="alertMessage">データベースに接続中...</span>
+            </div>
+        </div>
+
+        <div class="flex flex-row gap-4 h-[420px]">
+            
+            <div class="w-[320px] flex-shrink-0 flex flex-col gap-4 h-full">
+                <div class="win-outset flex flex-col h-full">
+                    <div class="win-titlebar flex items-center justify-between">
+                        <span class="flex items-center gap-1"><i class="ph ph-cpu"></i> システム状況</span>
+                        <div class="flex gap-1">
+                            <button class="win-btn w-4 h-4 flex items-center justify-center text-black font-bold font-mono">_</button>
+                            <button class="win-btn w-4 h-4 flex items-center justify-center text-black font-bold font-mono">X</button>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 flex-1 space-y-3">
+                        
+                        <div class="win-groupbox mt-0">
+                            <legend>全体設定 (手動入力)</legend>
+                            <div class="space-y-2 mt-1">
+                                <label class="flex items-center justify-between">
+                                    <span class="font-bold text-slate-800">全校クラス数:</span>
+                                    <input type="number" id="inputTotalClasses" value="0" min="1" class="win-inset w-16 p-0.5 text-right bg-white font-mono border-none outline-none">
+                                </label>
+                                <label class="flex items-center justify-between">
+                                    <span class="font-bold text-slate-800">全校生徒数:</span>
+                                    <input type="number" id="inputTotalStudents" value="0" min="1" class="win-inset w-16 p-0.5 text-right bg-white font-mono border-none outline-none">
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="pt-1">
+                            <span class="text-slate-600 block mb-1">現在の接続ステータス:</span>
+                            <div class="win-inset p-1 bg-slate-100 font-mono flex items-center gap-2">
+                                <span class="inline-block w-3 h-3 rounded-full bg-red-500" id="dbIndicator"></span>
+                                <span id="dbStatusText">オフライン/接続未確立</span>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-slate-300 pt-2">
+                            <span class="text-slate-600 block mb-1">報告完了クラス進捗:</span>
+                            <div class="flex justify-between items-end mb-1">
+                                <div class="text-2xl font-mono font-bold text-[#000080]" id="totalClasses">0 / 0</div>
+                                <div class="font-mono text-xs" id="classRateText">0%</div>
+                            </div>
+                            <div class="w-full h-5 win-progress-track">
+                                <div id="completionBar" class="h-full win-chunk-blue transition-all duration-300" style="width: 0%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-slate-300 pt-2 space-y-1">
+                            <h3 class="font-bold text-slate-800">全校出席率統計</h3>
+                            <div class="grid grid-cols-3 gap-1 text-center">
+                                <div class="win-inset p-1 bg-white">
+                                    <span class="text-[10px] text-slate-500 block">在籍総数</span>
+                                    <span class="text-sm font-mono font-bold text-[#000080]" id="statTotal">0</span>
+                                </div>
+                                <div class="win-inset p-1 bg-white">
+                                    <span class="text-[10px] text-slate-500 block">出席者数</span>
+                                    <span class="text-sm font-mono font-bold text-[#008000]" id="statAttended">0</span>
+                                </div>
+                                <div class="win-inset p-1 bg-white">
+                                    <span class="text-[10px] text-slate-500 block">欠席者数</span>
+                                    <span class="text-sm font-mono font-bold text-[#800000]" id="statAbsent">0</span>
+                                </div>
+                            </div>
+                            <div class="mt-1 text-right border-t border-dotted border-slate-400 pt-1">
+                                <span class="text-slate-600">全校出席率: </span>
+                                <span class="font-bold font-mono" id="statAttendanceRate">0.00%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-1 h-full">
+                <div class="win-outset h-full flex flex-col">
+                    <div class="win-titlebar flex items-center justify-between">
+                        <span class="flex items-center gap-1"><i class="ph ph-chart-bar"></i> 決議結果集計</span>
+                        <div class="flex gap-1">
+                            <button class="win-btn w-4 h-4 flex items-center justify-center text-black font-bold font-mono">_</button>
+                            <button class="win-btn w-4 h-4 flex items-center justify-center text-black font-bold font-mono">X</button>
+                        </div>
+                    </div>
+
+                    <div class="p-3 flex-1 flex flex-col">
+                        <div class="win-groupbox mb-2 mt-0">
+                            <legend>数直線の集計基準</legend>
+                            <div class="flex gap-6 mt-1 font-bold text-slate-800">
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="radio" name="viewMode" value="attended" checked class="cursor-pointer">
+                                    <span>出席者ベース (現在の報告完了分)</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="radio" name="viewMode" value="total" class="cursor-pointer">
+                                    <span>全校生徒ベース (未回答は棄権扱い)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4 justify-end border-b border-slate-400 pb-1 mb-2">
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-[#000080] inline-block border border-black"></span> 賛成</span>
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-[#800000] inline-block border border-black"></span> 反対</span>
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-[#808080] inline-block border border-black"></span> 棄権/無効</span>
+                        </div>
+
+                        <div id="agendasContainer" class="grid grid-cols-2 gap-x-6 gap-y-4 flex-1 overflow-y-auto">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="win-outset h-[350px] flex flex-col">
+            <div class="win-titlebar flex items-center justify-between">
+            <div class="p-1.5 bg-[#dfdfdf] border-b border-slate-300 flex items-center gap-2">
+                <span class="font-bold text-slate-700 ml-1">操作メニュー:</span>
+                <button onclick="location.reload()" class="win-btn px-2 py-0.5 font-bold flex items-center gap-1 hover:bg-slate-100 focus:outline-none">
+                    <i class="ph ph-arrow-counter-clockwise"></i> リロード
+                </button>
+                <div class="h-4 w-px bg-slate-400 mx-1"></div>
+                <span class="text-slate-600 font-mono text-xs" id="dataCount">取得数: 0 クラス</span>
+            </div>
+
+            <div class="overflow-y-auto flex-1 bg-white">
+                <table class="w-full border-collapse text-left bg-white">
+                    <thead class="sticky top-0 z-10 bg-slate-200">
+                        <tr class="text-slate-800 font-bold border-b-2 border-slate-400 shadow-sm">
+                            <th class="p-1.5 border-r border-slate-300 text-center w-16">状態</th>
+                            <th class="p-1.5 border-r border-slate-300">クラス名</th>
+                            <th class="p-1.5 border-r border-slate-300 text-right">在籍数</th>
+                            <th class="p-1.5 border-r border-slate-300 text-right">出席数</th>
+                            <th class="p-1.5 border-r border-slate-300 text-right">欠席数</th>
+                            <th class="p-1.5 border-r border-slate-300 text-center">第1号(賛/反)</th>
+                            <th class="p-1.5 border-r border-slate-300 text-center">第2号(賛/反)</th>
+                            <th class="p-1.5 border-r border-slate-300 text-center">第3号(賛/反)</th>
+                            <th class="p-1.5 border-r border-slate-300 text-center">第4号(賛/反)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rawDataTable" class="divide-y divide-slate-200 font-mono text-[13px]">
+                        <tr>
+                            <td colspan="9" class="p-4 text-center text-slate-500 bg-slate-50">
+                                <i class="ph ph-spinner animate-spin text-lg mr-1 align-middle"></i> データベース同期中...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, query, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        let db;
+        let auth;
+        let currentUser = null;
+        let currentVoteDocs = []; 
+
+        const loadSettings = () => {
+            const tc = localStorage.getItem('settingTotalClasses');
+            const ts = localStorage.getItem('settingTotalStudents');
+            if(tc) document.getElementById('inputTotalClasses').value = tc;
+            if(ts) document.getElementById('inputTotalStudents').value = ts;
+        };
+        const saveSettings = () => {
+            localStorage.setItem('settingTotalClasses', document.getElementById('inputTotalClasses').value);
+            localStorage.setItem('settingTotalStudents', document.getElementById('inputTotalStudents').value);
+        };
+
+        document.getElementById('inputTotalClasses').addEventListener('input', () => {
+            saveSettings();
+            if (currentVoteDocs.length >= 0) processAndRenderData(currentVoteDocs);
+        });
+        document.getElementById('inputTotalStudents').addEventListener('input', () => {
+            saveSettings();
+            if (currentVoteDocs.length >= 0) processAndRenderData(currentVoteDocs);
+        });
+        document.querySelectorAll('input[name="viewMode"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                if (currentVoteDocs.length >= 0) processAndRenderData(currentVoteDocs);
+            });
+        });
+
+        loadSettings();
+
+        const updateClock = () => {
+            const clockEl = document.getElementById('systemClock');
+            if (clockEl) {
+                const now = new Date();
+                const yyyy = now.getFullYear();
+                const mm = String(now.getMonth() + 1).padStart(2, '0');
+                const dd = String(now.getDate()).padStart(2, '0');
+                const hh = String(now.getHours()).padStart(2, '0');
+                const min = String(now.getMinutes()).padStart(2, '0');
+                const sec = String(now.getSeconds()).padStart(2, '0');
+                clockEl.textContent = `${yyyy}-${mm}-${dd} ${hh}:${min}:${sec} JST`;
+            }
+        };
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        const setAlert = (message, show = true) => {
+            const alertEl = document.getElementById('statusAlert');
+            const alertMsg = document.getElementById('alertMessage');
+            if (show) {
+                alertEl.classList.remove('hidden');
+                alertMsg.textContent = message;
+            } else {
+                alertEl.classList.add('hidden');
+            }
+        };
+
+        const updateConnectionIndicator = (status, isOnline = false) => {
+            const ind = document.getElementById('dbIndicator');
+            const text = document.getElementById('dbStatusText');
+            text.textContent = status;
+            if (isOnline) {
+                ind.className = 'inline-block w-3 h-3 rounded-full bg-green-500 animate-pulse';
+            } else {
+                ind.className = 'inline-block w-3 h-3 rounded-full bg-red-500';
+            }
+        };
+
+        const initFirebase = async () => {
+            try {
+                const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+                if (!firebaseConfig) {
+                    throw new Error("Firebase設定が見つかりません。");
+                }
+
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                updateConnectionIndicator("認証試行中...", false);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    currentUser = user;
+                    if (user) {
+                        updateConnectionIndicator("オンライン/同期中", true);
+                        setAlert("", false);
+                        startRealtimeSync();
+                    } else {
+                        updateConnectionIndicator("未認証", false);
+                        setAlert("Firebase認証に失敗しました。再読み込みしてください。", true);
+                    }
+                });
+
+            } catch (error) {
+                console.error("Firebase Initialization Error:", error);
+                updateConnectionIndicator("接続エラー", false);
+                setAlert(`接続エラー: ${error.message}`, true);
+            }
+        };
+
+        const startRealtimeSync = () => {
+            if (!currentUser) return;
+
+            const votesCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'votes');
+
+            onSnapshot(votesCollectionRef, (snapshot) => {
+                const voteDocs = [];
+                snapshot.forEach((doc) => {
+                    voteDocs.push({ id: doc.id, ...doc.data() });
+                });
+                
+                currentVoteDocs = voteDocs;
+                processAndRenderData(currentVoteDocs);
+            }, (error) => {
+                console.error("Firestore Listen Error:", error);
+                setAlert(`データ受信エラー: ${error.message}`, true);
+            });
+        };
+
+        const processAndRenderData = (docs) => {
+            const sortedDocs = [...docs].sort((a, b) => a.className.localeCompare(b.className, 'ja'));
+
+            document.getElementById('dataCount').textContent = `取得数: ${sortedDocs.length} クラス`;
+
+            let totalEnrollment = 0;
+            let totalAttended = 0;
+            let completedClassesCount = 0;
+
+            const agendaTotals = {
+                1: { yes: 0, no: 0, totalAttendedForVoting: 0 },
+                2: { yes: 0, no: 0, totalAttendedForVoting: 0 },
+                3: { yes: 0, no: 0, totalAttendedForVoting: 0 },
+                4: { yes: 0, no: 0, totalAttendedForVoting: 0 }
+            };
+
+            const tbody = document.getElementById('rawDataTable');
+            if (sortedDocs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-500 bg-slate-50">報告済みのデータがありません。</td></tr>`;
+                
+                const targetTotalClasses = parseInt(document.getElementById('inputTotalClasses').value, 10) || 0;
+                updateSystemSummary(targetTotalClasses, 0, 0, 0, 0);
+                
+                const viewMode = document.querySelector('input[name="viewMode"]:checked').value;
+                const targetTotalStudents = parseInt(document.getElementById('inputTotalStudents').value, 10) || 0;
+                renderAgendas(agendaTotals, viewMode, targetTotalStudents);
+                return;
+            }
+
+            let tableHtml = '';
+
+            sortedDocs.forEach(doc => {
+                const step = doc.step || 1;
+                const className = doc.className || '不明';
+                const total = doc.totalStudents || 0;
+                const attended = doc.attendedStudents || 0;
+                const absent = Math.max(0, total - attended);
+
+                totalEnrollment += total;
+                totalAttended += attended;
+
+                let badge = '';
+                if (step === 2) {
+                    completedClassesCount++;
+                    badge = `<span class="bg-green-100 text-green-800 border border-green-300 text-[10px] px-1.5 py-0.5 font-bold">完了</span>`;
+                    
+                    for (let i = 1; i <= 4; i++) {
+                        const yesVal = doc[`agenda${i}`]?.yes || 0;
+                        const noVal = doc[`agenda${i}`]?.no || 0;
+                        agendaTotals[i].yes += yesVal;
+                        agendaTotals[i].no += noVal;
+                        agendaTotals[i].totalAttendedForVoting += attended;
+                    }
+                } else {
+                    badge = `<span class="bg-blue-100 text-blue-800 border border-blue-300 text-[10px] px-1.5 py-0.5 font-bold">入力中</span>`;
+                }
+
+                const agStr = (agendaObj) => {
+                    if (!agendaObj) return `<span class="text-slate-400">--</span>`;
+                    return `<span class="text-blue-700">${agendaObj.yes}</span>/<span class="text-rose-600">${agendaObj.no}</span>`;
+                };
+
+                tableHtml += `
+                    <tr class="hover:bg-slate-50 border-b border-slate-300">
+                        <td class="p-2 border-r border-slate-300 text-center">${badge}</td>
+                        <td class="p-2 border-r border-slate-300 font-bold text-slate-900">${className}</td>
+                        <td class="p-2 border-r border-slate-300 text-right">${total}</td>
+                        <td class="p-2 border-r border-slate-300 text-right text-green-700 font-bold">${attended}</td>
+                        <td class="p-2 border-r border-slate-300 text-right text-rose-600">${absent}</td>
+                        <td class="p-2 border-r border-slate-300 text-center">${step === 2 ? agStr(doc.agenda1) : '--'}</td>
+                        <td class="p-2 border-r border-slate-300 text-center">${step === 2 ? agStr(doc.agenda2) : '--'}</td>
+                        <td class="p-2 border-r border-slate-300 text-center">${step === 2 ? agStr(doc.agenda3) : '--'}</td>
+                        <td class="p-2 border-r border-slate-300 text-center">${step === 2 ? agStr(doc.agenda4) : '--'}</td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = tableHtml;
+
+            const targetTotalClasses = parseInt(document.getElementById('inputTotalClasses').value, 10) || 0;
+            const targetTotalStudents = parseInt(document.getElementById('inputTotalStudents').value, 10) || 0;
+            const viewMode = document.querySelector('input[name="viewMode"]:checked').value;
+
+            updateSystemSummary(targetTotalClasses, completedClassesCount, totalEnrollment, totalAttended, Math.max(0, totalEnrollment - totalAttended));
+
+            renderAgendas(agendaTotals, viewMode, targetTotalStudents);
+        };
+
+        const updateSystemSummary = (totalClasses, completed, enrollment, attended, absent) => {
+            const displayTotalClasses = totalClasses > 0 ? totalClasses : completed;
+            document.getElementById('totalClasses').textContent = `${completed} / ${displayTotalClasses}`;
+            
+            const rate = displayTotalClasses > 0 ? (completed / displayTotalClasses) * 100 : 0;
+            const cappedRate = Math.min(100, rate);
+            document.getElementById('completionBar').style.width = `${cappedRate}%`;
+            document.getElementById('classRateText').textContent = `${cappedRate.toFixed(1)}%`;
+
+            document.getElementById('statTotal').textContent = enrollment;
+            document.getElementById('statAttended').textContent = attended;
+            document.getElementById('statAbsent').textContent = absent;
+
+            const attRate = enrollment > 0 ? (attended / enrollment) * 100 : 0;
+            document.getElementById('statAttendanceRate').textContent = `${attRate.toFixed(2)}%`;
+        };
+
+        const renderAgendas = (agendaTotals, viewMode, targetTotalStudents) => {
+            const container = document.getElementById('agendasContainer');
+            let html = '';
+
+            for (let i = 1; i <= 4; i++) {
+                const yes = agendaTotals[i].yes;
+                const no = agendaTotals[i].no;
+                
+                let base = agendaTotals[i].totalAttendedForVoting;
+                let viewTitle = "（現在の出席者ベース）";
+
+                if (viewMode === 'total') {
+                    base = targetTotalStudents;
+                    viewTitle = "（全校生徒ベース・未回答は棄権扱い）";
+                }
+                
+                base = Math.max(base, yes + no);
+
+                const abstain = Math.max(0, base - (yes + no));
+
+                const yesRate = base > 0 ? (yes / base) * 100 : 0;
+                const noRate = base > 0 ? (no / base) * 100 : 0;
+                const abstainRate = base > 0 ? (abstain / base) * 100 : 0;
+
+                html += `
+                    <div class="win-inset p-2 bg-[#ece9d8] flex flex-col justify-between shadow-sm">
+                        <div class="flex items-center justify-between font-bold border-b border-slate-300 pb-1 mb-2">
+                            <span class="text-[#000080]">第 ${i} 号議案 <span class="text-[10px] text-slate-500 font-normal ml-1">${viewTitle}</span></span>
+                            <span class="text-[11px] text-slate-600 font-mono">分母: ${base} 人</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-3 gap-1 text-[11px] font-mono mb-1">
+                            <div class="text-[#000080]">賛成: <b>${yes}</b> (<span class="${yesRate >= 50 ? 'font-bold bg-[#ffff00] px-0.5' : ''}">${yesRate.toFixed(1)}%</span>)</div>
+                            <div class="text-[#800000]">反対: <b>${no}</b> (${noRate.toFixed(1)}%)</div>
+                            <div class="text-[#606060]">棄権: <b>${abstain}</b> (${abstainRate.toFixed(1)}%)</div>
+                        </div>
+
+                        <div class="w-full h-5 win-progress-track flex">
+                            <div class="win-chunk-blue h-full transition-all duration-300 border-r border-[#c0c0c0]" style="width: ${yesRate}%" title="賛成: ${yes}票"></div>
+                            <div class="win-chunk-red h-full transition-all duration-300 border-r border-[#c0c0c0]" style="width: ${noRate}%" title="反対: ${no}票"></div>
+                            <div class="win-chunk-gray h-full transition-all duration-300" style="width: ${abstainRate}%" title="棄権: ${abstain}票"></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        };
+
+      
+        initFirebase();
+    </script>
+</body>
+</html>
