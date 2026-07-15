@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>生徒総会 投票結果集計システム [Windows NT 4.0]</title>
+    <title>生徒総会 投票結果集計システム [Version 0.1]</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -70,17 +70,14 @@
             border: 2px solid #ffffff;
             border-top-color: #808080;
             border-left-color: #808080;
-            padding: 10px;
-            margin-top: 12px;
-            position: relative;
+            padding: 8px 12px 12px 12px;
+            margin-top: 8px;
+            margin-bottom: 4px;
         }
         .win-groupbox legend {
             padding: 0 4px;
-            background-color: #c0c0c0;
-            position: absolute;
-            top: -8px;
-            left: 8px;
             font-size: 12px;
+            color: #000;
         }
 
         ::-webkit-scrollbar {
@@ -130,7 +127,7 @@
                 <i class="ph-bold ph-monitor text-xl text-blue-900"></i>
                 <div class="font-bold">
                     <span class="text-slate-700">生徒会管理コンソール -</span> 
-                    <span class="text-blue-900">投票結果集計ビューアー [Version 4.0]</span>
+                    <span class="text-blue-900">投票結果集計ビューアー [Version 0.1]</span>
                 </div>
             </div>
             <div class="flex items-center gap-2 text-slate-700 font-mono text-xs pr-2" id="systemClock">
@@ -146,7 +143,7 @@
             </div>
         </div>
 
-        <div class="flex flex-row gap-4 h-[420px]">
+        <div class="flex flex-row gap-4 h-[460px]">
             
             <div class="w-[320px] flex-shrink-0 flex flex-col gap-4 h-full">
                 <div class="win-outset flex flex-col h-full">
@@ -158,9 +155,9 @@
                         </div>
                     </div>
                     
-                    <div class="p-3 flex-1 space-y-3">
+                    <div class="p-3 flex-1 flex flex-col overflow-y-auto">
                         
-                        <div class="win-groupbox mt-0">
+                        <fieldset class="win-groupbox mt-0">
                             <legend>全体設定 (手動入力)</legend>
                             <div class="space-y-2 mt-1">
                                 <label class="flex items-center justify-between">
@@ -172,9 +169,9 @@
                                     <input type="number" id="inputTotalStudents" value="0" min="1" class="win-inset w-16 p-0.5 text-right bg-white font-mono border-none outline-none">
                                 </label>
                             </div>
-                        </div>
+                        </fieldset>
 
-                        <div class="pt-1">
+                        <div class="pt-2 mb-2">
                             <span class="text-slate-600 block mb-1">現在の接続ステータス:</span>
                             <div class="win-inset p-1 bg-slate-100 font-mono flex items-center gap-2">
                                 <span class="inline-block w-3 h-3 rounded-full bg-red-500" id="dbIndicator"></span>
@@ -182,7 +179,7 @@
                             </div>
                         </div>
 
-                        <div class="border-t border-slate-300 pt-2">
+                        <div class="border-t border-slate-300 pt-2 mb-2">
                             <span class="text-slate-600 block mb-1">報告完了クラス進捗:</span>
                             <div class="flex justify-between items-end mb-1">
                                 <div class="text-2xl font-mono font-bold text-[#000080]" id="totalClasses">0 / 0</div>
@@ -193,18 +190,18 @@
                             </div>
                         </div>
 
-                        <div class="border-t border-slate-300 pt-2 space-y-1">
+                        <div class="border-t border-slate-300 pt-2 space-y-1 mt-auto">
                             <h3 class="font-bold text-slate-800">全校出席率統計</h3>
                             <div class="grid grid-cols-3 gap-1 text-center">
-                                <div class="win-inset p-1 bg-white">
+                                <div class="win-inset p-1 bg-white flex flex-col justify-center">
                                     <span class="text-[10px] text-slate-500 block">在籍総数</span>
                                     <span class="text-sm font-mono font-bold text-[#000080]" id="statTotal">0</span>
                                 </div>
-                                <div class="win-inset p-1 bg-white">
+                                <div class="win-inset p-1 bg-white flex flex-col justify-center">
                                     <span class="text-[10px] text-slate-500 block">出席者数</span>
                                     <span class="text-sm font-mono font-bold text-[#008000]" id="statAttended">0</span>
                                 </div>
-                                <div class="win-inset p-1 bg-white">
+                                <div class="win-inset p-1 bg-white flex flex-col justify-center">
                                     <span class="text-[10px] text-slate-500 block">欠席者数</span>
                                     <span class="text-sm font-mono font-bold text-[#800000]" id="statAbsent">0</span>
                                 </div>
@@ -229,9 +226,9 @@
                     </div>
 
                     <div class="p-3 flex-1 flex flex-col">
-                        <div class="win-groupbox mb-2 mt-0">
+                        <fieldset class="win-groupbox mb-2 mt-0">
                             <legend>数直線の集計基準</legend>
-                            <div class="flex gap-6 mt-1 font-bold text-slate-800">
+                            <div class="flex flex-wrap gap-x-6 gap-y-2 mt-1 font-bold text-slate-800">
                                 <label class="flex items-center gap-1 cursor-pointer">
                                     <input type="radio" name="viewMode" value="attended" checked class="cursor-pointer">
                                     <span>出席者ベース (現在の報告完了分)</span>
@@ -241,15 +238,16 @@
                                     <span>全校生徒ベース (未回答は棄権扱い)</span>
                                 </label>
                             </div>
-                        </div>
+                        </fieldset>
 
-                        <div class="flex gap-4 justify-end border-b border-slate-400 pb-1 mb-2">
+                        <div class="flex gap-4 justify-end border-b border-slate-400 pb-1 mb-3">
                             <span class="flex items-center gap-1"><span class="w-3 h-3 bg-[#000080] inline-block border border-black"></span> 賛成</span>
                             <span class="flex items-center gap-1"><span class="w-3 h-3 bg-[#800000] inline-block border border-black"></span> 反対</span>
                             <span class="flex items-center gap-1"><span class="w-3 h-3 bg-[#808080] inline-block border border-black"></span> 棄権/無効</span>
                         </div>
 
-                        <div id="agendasContainer" class="grid grid-cols-2 gap-x-6 gap-y-4 flex-1 overflow-y-auto">
+                        <div id="agendasContainer" class="grid grid-cols-2 gap-x-6 gap-y-4 flex-1 overflow-y-auto pr-1">
+                            <!-- 議題（固定4件）がここに描画されます -->
                         </div>
                     </div>
                 </div>
@@ -258,7 +256,15 @@
         </div>
 
         <div class="win-outset h-[350px] flex flex-col">
+            <!-- 修正箇所: 不足していたタイトルバー構造を復元 -->
             <div class="win-titlebar flex items-center justify-between">
+                <span class="flex items-center gap-1"><i class="ph ph-table"></i> クラス別報告一覧</span>
+                <div class="flex gap-1">
+                    <button class="win-btn w-4 h-4 flex items-center justify-center text-black font-bold font-mono">_</button>
+                    <button class="win-btn w-4 h-4 flex items-center justify-center text-black font-bold font-mono">X</button>
+                </div>
+            </div>
+            
             <div class="p-1.5 bg-[#dfdfdf] border-b border-slate-300 flex items-center gap-2">
                 <span class="font-bold text-slate-700 ml-1">操作メニュー:</span>
                 <button onclick="location.reload()" class="win-btn px-2 py-0.5 font-bold flex items-center gap-1 hover:bg-slate-100 focus:outline-none">
@@ -268,7 +274,7 @@
                 <span class="text-slate-600 font-mono text-xs" id="dataCount">取得数: 0 クラス</span>
             </div>
 
-            <div class="overflow-y-auto flex-1 bg-white">
+            <div class="overflow-y-auto flex-1 bg-white relative">
                 <table class="w-full border-collapse text-left bg-white">
                     <thead class="sticky top-0 z-10 bg-slate-200">
                         <tr class="text-slate-800 font-bold border-b-2 border-slate-400 shadow-sm">
@@ -375,14 +381,14 @@
         const initFirebase = async () => {
             try {
                 const firebaseConfig = {
-    apiKey: "AIzaSyCNbylYM-96elHEwq122riR48ZRc-mU_B8",
-    authDomain: "v-s-system.firebaseapp.com",
-    projectId: "v-s-system",
-    storageBucket: "v-s-system.firebasestorage.app",
-    messagingSenderId: "639176585909",
-    appId: "1:639176585909:web:2abf53f9f0cc37fce244fc",
-    measurementId: "G-NW7NVQ61Q7"
-  };
+                    apiKey: "AIzaSyCNbylYM-96elHEwq122riR48ZRc-mU_B8",
+                    authDomain: "v-s-system.firebaseapp.com",
+                    projectId: "v-s-system",
+                    storageBucket: "v-s-system.firebasestorage.app",
+                    messagingSenderId: "639176585909",
+                    appId: "1:639176585909:web:2abf53f9f0cc37fce244fc",
+                    measurementId: "G-NW7NVQ61Q7"
+                };
 
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
@@ -564,19 +570,19 @@
                 const abstainRate = base > 0 ? (abstain / base) * 100 : 0;
 
                 html += `
-                    <div class="win-inset p-2 bg-[#ece9d8] flex flex-col justify-between shadow-sm">
-                        <div class="flex items-center justify-between font-bold border-b border-slate-300 pb-1 mb-2">
-                            <span class="text-[#000080]">第 ${i} 号議案 <span class="text-[10px] text-slate-500 font-normal ml-1">${viewTitle}</span></span>
-                            <span class="text-[11px] text-slate-600 font-mono">分母: ${base} 人</span>
+                    <div class="win-inset p-2.5 bg-[#ece9d8] flex flex-col shadow-sm min-h-[120px]">
+                        <div class="flex flex-wrap items-center justify-between font-bold border-b border-slate-300 pb-1 mb-2 gap-1">
+                            <span class="text-[#000080]">第 ${i} 号議案 <span class="text-[10px] text-slate-500 font-normal inline-block">${viewTitle}</span></span>
+                            <span class="text-[11px] text-slate-600 font-mono whitespace-nowrap">分母: ${base} 人</span>
                         </div>
                         
-                        <div class="grid grid-cols-3 gap-1 text-[11px] font-mono mb-1">
-                            <div class="text-[#000080]">賛成: <b>${yes}</b> (<span class="${yesRate >= 50 ? 'font-bold bg-[#ffff00] px-0.5' : ''}">${yesRate.toFixed(1)}%</span>)</div>
-                            <div class="text-[#800000]">反対: <b>${no}</b> (${noRate.toFixed(1)}%)</div>
-                            <div class="text-[#606060]">棄権: <b>${abstain}</b> (${abstainRate.toFixed(1)}%)</div>
+                        <div class="grid grid-cols-3 gap-1 text-[11px] font-mono mb-2 flex-1">
+                            <div class="text-[#000080]">賛成: <b>${yes}</b><br>(<span class="${yesRate >= 50 ? 'font-bold bg-[#ffff00] px-0.5' : ''}">${yesRate.toFixed(1)}%</span>)</div>
+                            <div class="text-[#800000]">反対: <b>${no}</b><br>(${noRate.toFixed(1)}%)</div>
+                            <div class="text-[#606060]">棄権: <b>${abstain}</b><br>(${abstainRate.toFixed(1)}%)</div>
                         </div>
 
-                        <div class="w-full h-5 win-progress-track flex">
+                        <div class="w-full h-5 win-progress-track flex mt-auto">
                             <div class="win-chunk-blue h-full transition-all duration-300 border-r border-[#c0c0c0]" style="width: ${yesRate}%" title="賛成: ${yes}票"></div>
                             <div class="win-chunk-red h-full transition-all duration-300 border-r border-[#c0c0c0]" style="width: ${noRate}%" title="反対: ${no}票"></div>
                             <div class="win-chunk-gray h-full transition-all duration-300" style="width: ${abstainRate}%" title="棄権: ${abstain}票"></div>
@@ -588,7 +594,6 @@
             container.innerHTML = html;
         };
 
-      
         initFirebase();
     </script>
 </body>
