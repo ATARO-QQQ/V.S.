@@ -374,10 +374,15 @@
 
         const initFirebase = async () => {
             try {
-                const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-                if (!firebaseConfig) {
-                    throw new Error("Firebase設定が見つかりません。");
-                }
+                const firebaseConfig = {
+    apiKey: "AIzaSyCNbylYM-96elHEwq122riR48ZRc-mU_B8",
+    authDomain: "v-s-system.firebaseapp.com",
+    projectId: "v-s-system",
+    storageBucket: "v-s-system.firebasestorage.app",
+    messagingSenderId: "639176585909",
+    appId: "1:639176585909:web:2abf53f9f0cc37fce244fc",
+    measurementId: "G-NW7NVQ61Q7"
+  };
 
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
