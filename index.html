@@ -99,68 +99,10 @@
                         <span class="text-xs font-normal text-blue-600">賛成・反対の合計がこの人数を超えないように入力してください。</span>
                     </p>
                 </div>
-              
-                <div class="bg-slate-50/50 p-5 rounded-2xl border border-slate-200">
-                    <h3 class="text-lg font-bold text-slate-800 mb-4">第1号議案</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label for="agenda1Yes" class="block text-sm font-bold text-blue-700 mb-2">賛成 (票)</label>
-                            <input type="text" inputmode="numeric" id="agenda1Yes" placeholder="0" required
-                                class="number-input w-full text-xl text-center font-bold p-3 bg-white border-2 border-slate-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all text-blue-700 placeholder:text-blue-200">
-                        </div>
-                        <div>
-                            <label for="agenda1No" class="block text-sm font-bold text-rose-700 mb-2">反対 (票)</label>
-                            <input type="text" inputmode="numeric" id="agenda1No" placeholder="0" required
-                                class="number-input w-full text-xl text-center font-bold p-3 bg-white border-2 border-slate-300 rounded-xl focus:outline-none focus:border-rose-500 focus:ring-4 focus:ring-rose-100 transition-all text-rose-700 placeholder:text-rose-200">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-slate-50/50 p-5 rounded-2xl border border-slate-200">
-                    <h3 class="text-lg font-bold text-slate-800 mb-4">第2号議案</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label for="agenda2Yes" class="block text-sm font-bold text-blue-700 mb-2">賛成 (票)</label>
-                            <input type="text" inputmode="numeric" id="agenda2Yes" placeholder="0" required
-                                class="number-input w-full text-xl text-center font-bold p-3 bg-white border-2 border-slate-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all text-blue-700 placeholder:text-blue-200">
-                        </div>
-                        <div>
-                            <label for="agenda2No" class="block text-sm font-bold text-rose-700 mb-2">反対 (票)</label>
-                            <input type="text" inputmode="numeric" id="agenda2No" placeholder="0" required
-                                class="number-input w-full text-xl text-center font-bold p-3 bg-white border-2 border-slate-300 rounded-xl focus:outline-none focus:border-rose-500 focus:ring-4 focus:ring-rose-100 transition-all text-rose-700 placeholder:text-rose-200">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-slate-50/50 p-5 rounded-2xl border border-slate-200">
-                    <h3 class="text-lg font-bold text-slate-800 mb-4">第3号議案</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label for="agenda3Yes" class="block text-sm font-bold text-blue-700 mb-2">賛成 (票)</label>
-                            <input type="text" inputmode="numeric" id="agenda3Yes" placeholder="0" required
-                                class="number-input w-full text-xl text-center font-bold p-3 bg-white border-2 border-slate-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all text-blue-700 placeholder:text-blue-200">
-                        </div>
-                        <div>
-                            <label for="agenda3No" class="block text-sm font-bold text-rose-700 mb-2">反対 (票)</label>
-                            <input type="text" inputmode="numeric" id="agenda3No" placeholder="0" required
-                                class="number-input w-full text-xl text-center font-bold p-3 bg-white border-2 border-slate-300 rounded-xl focus:outline-none focus:border-rose-500 focus:ring-4 focus:ring-rose-100 transition-all text-rose-700 placeholder:text-rose-200">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-slate-50/50 p-5 rounded-2xl border border-slate-200">
-                    <h3 class="text-lg font-bold text-slate-800 mb-4">第4号議案</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label for="agenda4Yes" class="block text-sm font-bold text-blue-700 mb-2">賛成 (票)</label>
-                            <input type="text" inputmode="numeric" id="agenda4Yes" placeholder="0" required
-                                class="number-input w-full text-xl text-center font-bold p-3 bg-white border-2 border-slate-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all text-blue-700 placeholder:text-blue-200">
-                        </div>
-                        <div>
-                            <label for="agenda4No" class="block text-sm font-bold text-rose-700 mb-2">反対 (票)</label>
-                            <input type="text" inputmode="numeric" id="agenda4No" placeholder="0" required
-                                class="number-input w-full text-xl text-center font-bold p-3 bg-white border-2 border-slate-300 rounded-xl focus:outline-none focus:border-rose-500 focus:ring-4 focus:ring-rose-100 transition-all text-rose-700 placeholder:text-rose-200">
-                        </div>
+               
+                <div id="dynamicAgendasContainer" class="space-y-6">
+                    <div class="text-center text-slate-500 py-8">
+                        <i class="ph ph-spinner animate-spin text-2xl mb-2"></i><br>議題データを読み込み中...
                     </div>
                 </div>
             </section>
@@ -177,7 +119,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, updateDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, updateDoc, doc, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         let db;
@@ -186,6 +128,7 @@
         
         let currentDocumentId = null;
         let currentAttendedCount = 0;
+        let currentAgendas = [];
 
         const formatNumberInput = (element) => {
             let val = element.value;
@@ -194,12 +137,16 @@
             element.value = val;
         };
 
-        document.querySelectorAll('.number-input').forEach(input => {
-            input.addEventListener('input', (e) => formatNumberInput(e.target));
-            input.addEventListener('paste', (e) => {
-                setTimeout(() => formatNumberInput(e.target), 10);
+        const attachNumberInputListeners = (container) => {
+            container.querySelectorAll('.number-input').forEach(input => {
+                input.addEventListener('input', (e) => formatNumberInput(e.target));
+                input.addEventListener('paste', (e) => {
+                    setTimeout(() => formatNumberInput(e.target), 10);
+                });
             });
-        });
+        };
+
+        attachNumberInputListeners(document);
 
         const showMessage = (text, type) => {
             const msgArea = document.getElementById('messageArea');
@@ -221,8 +168,12 @@
                 btn.disabled = true;
                 btn.innerHTML = `<i class="ph ph-spinner animate-spin text-xl"></i><span>処理中...</span>`;
             } else {
-                btn.disabled = !currentUser;
-                btn.innerHTML = `<i class="ph ph-paper-plane-right text-xl"></i><span>クラス情報を送信して次へ</span>`;
+                btn.disabled = !currentUser || currentAgendas.length === 0;
+                if (currentAgendas.length === 0) {
+                    btn.innerHTML = `<i class="ph ph-warning-circle text-xl"></i><span>議題データの取得待ち...</span>`;
+                } else {
+                    btn.innerHTML = `<i class="ph ph-paper-plane-right text-xl"></i><span>クラス情報を送信して次へ</span>`;
+                }
             }
         };
 
@@ -237,17 +188,58 @@
             }
         };
 
+        const renderAgendaInputs = () => {
+            const container = document.getElementById('dynamicAgendasContainer');
+            if (currentAgendas.length === 0) {
+                container.innerHTML = '<div class="text-center text-slate-500 py-8">議題が設定されていません。</div>';
+                setClassInfoButtonState(false);
+                return;
+            }
+
+            let html = '';
+            currentAgendas.forEach(ag => {
+                const num = ag.number;
+                const theme = ag.theme || '';
+                const themeHtml = theme ? `<p class="text-sm font-bold text-slate-500 mb-4 bg-white px-3 py-2 rounded-lg border border-slate-200">議題テーマ：${theme}</p>` : '';
+                const mbClass = theme ? 'mb-2' : 'mb-4';
+                
+                html += `
+                <div class="bg-slate-50/50 p-5 rounded-2xl border border-slate-200">
+                    <h3 class="text-lg font-bold text-slate-800 ${mbClass}">第${num}号議案</h3>
+                    ${themeHtml}
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="agenda${num}Yes" class="block text-sm font-bold text-blue-700 mb-2">賛成 (票)</label>
+                            <input type="text" inputmode="numeric" id="agenda${num}Yes" placeholder="0" required
+                                class="number-input w-full text-xl text-center font-bold p-3 bg-white border-2 border-slate-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all text-blue-700 placeholder:text-blue-200">
+                        </div>
+                        <div>
+                            <label for="agenda${num}No" class="block text-sm font-bold text-rose-700 mb-2">反対 (票)</label>
+                            <input type="text" inputmode="numeric" id="agenda${num}No" placeholder="0" required
+                                class="number-input w-full text-xl text-center font-bold p-3 bg-white border-2 border-slate-300 rounded-xl focus:outline-none focus:border-rose-500 focus:ring-4 focus:ring-rose-100 transition-all text-rose-700 placeholder:text-rose-200">
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+            container.innerHTML = html;
+            
+            attachNumberInputListeners(container);
+            
+            setClassInfoButtonState(false);
+        };
+
         const initFirebase = async () => {
             try {
                 const firebaseConfig = {
-    apiKey: "AIzaSyCNbylYM-96elHEwq122riR48ZRc-mU_B8",
-    authDomain: "v-s-system.firebaseapp.com",
-    projectId: "v-s-system",
-    storageBucket: "v-s-system.firebasestorage.app",
-    messagingSenderId: "639176585909",
-    appId: "1:639176585909:web:2abf53f9f0cc37fce244fc",
-    measurementId: "G-NW7NVQ61Q7"
-  };
+                    apiKey: "AIzaSyCNbylYM-96elHEwq122riR48ZRc-mU_B8",
+                    authDomain: "v-s-system.firebaseapp.com",
+                    projectId: "v-s-system",
+                    storageBucket: "v-s-system.firebasestorage.app",
+                    messagingSenderId: "639176585909",
+                    appId: "1:639176585909:web:2abf53f9f0cc37fce244fc",
+                    measurementId: "G-NW7NVQ61Q7"
+                };
 
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
@@ -262,7 +254,18 @@
                 onAuthStateChanged(auth, (user) => {
                     currentUser = user;
                     if (user) {
-                        setClassInfoButtonState(false);
+                        const agendasCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'agendas');
+                        onSnapshot(agendasCollectionRef, (snapshot) => {
+                            const agendas = [];
+                            snapshot.forEach((doc) => {
+                                agendas.push({ id: doc.id, ...doc.data() });
+                            });
+                            currentAgendas = agendas.sort((a, b) => (a.number || 0) - (b.number || 0));
+                            renderAgendaInputs();
+                        }, (error) => {
+                            console.error("Firestore Listen Error (agendas):", error);
+                            showMessage(`議題データの読み込みに失敗しました: ${error.message}`, "error");
+                        });
                     } else {
                         showMessage("認証に失敗しました。再読み込みしてください。", "error");
                     }
@@ -321,7 +324,6 @@
                 currentDocumentId = docRef.id;
                 currentAttendedCount = attendedStudents;
 
-              
                 document.getElementById('classInfoStatus').classList.remove('hidden');
                 document.getElementById('classInfoBtnContainer').classList.add('hidden');
                 document.getElementById('className').disabled = true;
@@ -355,33 +357,30 @@
             }
 
             const getVal = (id) => {
-                const val = document.getElementById(id).value;
+                const input = document.getElementById(id);
+                if (!input) return 0;
+                const val = input.value;
                 return val ? parseInt(val, 10) : 0;
             };
 
-            const agendas = [
-                { id: 1, yes: getVal('agenda1Yes'), no: getVal('agenda1No') },
-                { id: 2, yes: getVal('agenda2Yes'), no: getVal('agenda2No') },
-                { id: 3, yes: getVal('agenda3Yes'), no: getVal('agenda3No') },
-                { id: 4, yes: getVal('agenda4Yes'), no: getVal('agenda4No') },
-            ];
-
-            for (const agenda of agendas) {
-                if (agenda.yes + agenda.no > currentAttendedCount) {
-                    showMessage(`第${agenda.id}号議案の「賛成と反対の合計数（${agenda.yes + agenda.no}票）」が「出席人数（${currentAttendedCount}人）」を上回っています。`, "error");
-                    document.getElementById(`agenda${agenda.id}Yes`).focus();
-                    return;
-                }
-            }
-
             const voteData = {
-                agenda1: { yes: agendas[0].yes, no: agendas[0].no },
-                agenda2: { yes: agendas[1].yes, no: agendas[1].no },
-                agenda3: { yes: agendas[2].yes, no: agendas[2].no },
-                agenda4: { yes: agendas[3].yes, no: agendas[3].no },
                 step: 2, 
                 completedAt: serverTimestamp()
             };
+
+            for (const ag of currentAgendas) {
+                const num = ag.number;
+                const yes = getVal(`agenda${num}Yes`);
+                const no = getVal(`agenda${num}No`);
+
+                if (yes + no > currentAttendedCount) {
+                    showMessage(`第${num}号議案の「賛成と反対の合計数（${yes + no}票）」が「出席人数（${currentAttendedCount}人）」を上回っています。`, "error");
+                    document.getElementById(`agenda${num}Yes`).focus();
+                    return;
+                }
+
+                voteData[`agenda${num}`] = { yes, no };
+            }
 
             setVoteButtonState(true);
             document.getElementById('messageArea').classList.add('hidden');
