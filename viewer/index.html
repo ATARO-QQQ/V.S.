@@ -52,6 +52,7 @@
 
         .win-titlebar {
             background-color: #000080;
+            /* 4bitカラー（NavyとBlue）による段階的なディザリンググラデーション */
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" preserveAspectRatio="none"><defs><pattern id="p1" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="%23000080"/><rect x="0" y="0" width="1" height="1" fill="%230000ff"/><rect x="2" y="2" width="1" height="1" fill="%230000ff"/></pattern><pattern id="p2" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="%23000080"/><rect x="0" y="0" width="1" height="1" fill="%230000ff"/><rect x="2" y="2" width="1" height="1" fill="%230000ff"/><rect x="2" y="0" width="1" height="1" fill="%230000ff"/><rect x="0" y="2" width="1" height="1" fill="%230000ff"/></pattern><pattern id="p3" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="%23000080"/><rect x="0" y="0" width="1" height="1" fill="%230000ff"/><rect x="2" y="0" width="1" height="1" fill="%230000ff"/><rect x="0" y="2" width="1" height="1" fill="%230000ff"/><rect x="2" y="2" width="1" height="1" fill="%230000ff"/><rect x="1" y="1" width="1" height="1" fill="%230000ff"/><rect x="3" y="3" width="1" height="1" fill="%230000ff"/></pattern><pattern id="p4" width="2" height="2" patternUnits="userSpaceOnUse"><rect width="2" height="2" fill="%23000080"/><rect x="0" y="0" width="1" height="1" fill="%230000ff"/><rect x="1" y="1" width="1" height="1" fill="%230000ff"/></pattern><pattern id="p5" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="%230000ff"/><rect x="0" y="0" width="1" height="1" fill="%23000080"/><rect x="2" y="0" width="1" height="1" fill="%23000080"/><rect x="0" y="2" width="1" height="1" fill="%23000080"/><rect x="2" y="2" width="1" height="1" fill="%23000080"/><rect x="1" y="1" width="1" height="1" fill="%23000080"/><rect x="3" y="3" width="1" height="1" fill="%23000080"/></pattern><pattern id="p6" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="%230000ff"/><rect x="0" y="0" width="1" height="1" fill="%23000080"/><rect x="2" y="2" width="1" height="1" fill="%23000080"/><rect x="2" y="0" width="1" height="1" fill="%23000080"/><rect x="0" y="2" width="1" height="1" fill="%23000080"/></pattern><pattern id="p7" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="%230000ff"/><rect x="0" y="0" width="1" height="1" fill="%23000080"/><rect x="2" y="2" width="1" height="1" fill="%23000080"/></pattern></defs><rect x="0%" y="0" width="11.1%" height="100%" fill="%23000080"/><rect x="11.1%" y="0" width="11.1%" height="100%" fill="url(%23p1)"/><rect x="22.2%" y="0" width="11.1%" height="100%" fill="url(%23p2)"/><rect x="33.3%" y="0" width="11.1%" height="100%" fill="url(%23p3)"/><rect x="44.4%" y="0" width="11.2%" height="100%" fill="url(%23p4)"/><rect x="55.5%" y="0" width="11.1%" height="100%" fill="url(%23p5)"/><rect x="66.6%" y="0" width="11.1%" height="100%" fill="url(%23p6)"/><rect x="77.7%" y="0" width="11.1%" height="100%" fill="url(%23p7)"/><rect x="88.8%" y="0" width="11.2%" height="100%" fill="%230000ff"/></svg>');
             color: #ffffff;
             padding: 2px 4px;
@@ -87,6 +88,7 @@
         }
         ::-webkit-scrollbar-track {
             background-color: #c0c0c0;
+            /* SilverとWhiteのディザリングパターン */
             background-image: 
                 linear-gradient(45deg, #ffffff 25%, transparent 25%, transparent 75%, #ffffff 75%, #ffffff), 
                 linear-gradient(45deg, #ffffff 25%, transparent 25%, transparent 75%, #ffffff 75%, #ffffff);
@@ -112,6 +114,7 @@
             background-size: 12px 100%;
         }
 
+        /* 投票中の古典的ローダーアニメーション */
         @keyframes spin-blocks {
             0%, 100% { background-color: #c0c0c0; box-shadow: inset -1px -1px 0 #ffffff, inset 1px 1px 0 #808080; }
             25% { background-color: #000080; box-shadow: none; }
@@ -128,11 +131,13 @@
             background-color: #c0c0c0;
             box-shadow: inset -1px -1px 0 #ffffff, inset 1px 1px 0 #808080;
         }
+        /* 時計回りに点滅 */
         .classic-spinner .s-block:nth-child(1) { animation: spin-blocks 1.2s infinite; animation-delay: 0s; }
         .classic-spinner .s-block:nth-child(2) { animation: spin-blocks 1.2s infinite; animation-delay: 0.3s; }
         .classic-spinner .s-block:nth-child(4) { animation: spin-blocks 1.2s infinite; animation-delay: 0.6s; }
         .classic-spinner .s-block:nth-child(3) { animation: spin-blocks 1.2s infinite; animation-delay: 0.9s; }
 
+        /* 独自の粗い四角形ラジオボタンUI */
         .classic-radio {
             appearance: none;
             -webkit-appearance: none;
@@ -207,6 +212,7 @@
 
         <div class="flex flex-col gap-4">
             
+            <!-- 上段: システム状況 & 集計 -->
             <div class="flex flex-row gap-4 h-[440px]">
                 
                 <div class="w-[320px] flex-shrink-0 flex flex-col gap-4 h-full">
@@ -215,11 +221,13 @@
                             <span class="flex items-center gap-1"><i class="ph ph-cpu"></i> システム状況</span>
                             <div class="flex gap-1">
                                 <button class="win-btn w-4 h-4 flex items-center justify-center">
+                                    <!-- ドット風 最小化ボタン (粗い横棒) -->
                                     <svg width="6" height="2" viewBox="0 0 6 2" fill="none" xmlns="http://www.w3.org/2000/svg" class="align-middle">
                                         <rect width="6" height="2" fill="black"/>
                                     </svg>
                                 </button>
                                 <button class="win-btn w-4 h-4 flex items-center justify-center">
+                                    <!-- ドット風 閉じるボタン (粗いバツ印) -->
                                     <svg width="6" height="6" viewBox="0 0 6 6" fill="none" xmlns="http://www.w3.org/2000/svg" class="align-middle">
                                         <path d="M0.5 0.5L5.5 5.5M5.5 0.5L0.5 5.5" stroke="black" stroke-width="1.5"/>
                                     </svg>
@@ -293,11 +301,13 @@
                             <span class="flex items-center gap-1"><i class="ph ph-chart-bar"></i> 決議結果集計</span>
                             <div class="flex gap-1">
                                 <button class="win-btn w-4 h-4 flex items-center justify-center">
+                                    <!-- ドット風 最小化ボタン -->
                                     <svg width="6" height="2" viewBox="0 0 6 2" fill="none" xmlns="http://www.w3.org/2000/svg" class="align-middle">
                                         <rect width="6" height="2" fill="black"/>
                                     </svg>
                                 </button>
                                 <button class="win-btn w-4 h-4 flex items-center justify-center">
+                                    <!-- ドット風 閉じるボタン -->
                                     <svg width="6" height="6" viewBox="0 0 6 6" fill="none" xmlns="http://www.w3.org/2000/svg" class="align-middle">
                                         <path d="M0.5 0.5L5.5 5.5M5.5 0.5L0.5 5.5" stroke="black" stroke-width="1.5"/>
                                     </svg>
@@ -327,6 +337,7 @@
                             </div>
 
                             <div id="agendasContainer" class="grid grid-cols-2 gap-x-6 gap-y-4 flex-1 overflow-y-auto pr-1">
+                                <!-- 議題がここに描画されます -->
                             </div>
                         </div>
                     </div>
@@ -334,6 +345,7 @@
 
             </div>
 
+            <!-- 下段: クラス一覧 & 統計・分析ツール -->
             <div class="flex flex-row gap-4 h-[350px]">
                 
                 <div class="flex-1 h-full">
@@ -342,11 +354,13 @@
                             <span class="flex items-center gap-1"><i class="ph ph-table"></i> クラス別報告一覧</span>
                             <div class="flex gap-1">
                                 <button class="win-btn w-4 h-4 flex items-center justify-center">
+                                    <!-- ドット風 最小化ボタン -->
                                     <svg width="6" height="2" viewBox="0 0 6 2" fill="none" xmlns="http://www.w3.org/2000/svg" class="align-middle">
                                         <rect width="6" height="2" fill="black"/>
                                     </svg>
                                 </button>
                                 <button class="win-btn w-4 h-4 flex items-center justify-center">
+                                    <!-- ドット風 閉じるボタン -->
                                     <svg width="6" height="6" viewBox="0 0 6 6" fill="none" xmlns="http://www.w3.org/2000/svg" class="align-middle">
                                         <path d="M0.5 0.5L5.5 5.5M5.5 0.5L0.5 5.5" stroke="black" stroke-width="1.5"/>
                                     </svg>
@@ -372,6 +386,7 @@
                                         <th class="p-1.5 border-r border-[#808080] text-right">在籍数</th>
                                         <th class="p-1.5 border-r border-[#808080] text-right">出席数</th>
                                         <th class="p-1.5 border-r border-[#808080] text-right">欠席数</th>
+                                        <!-- ここに議題ごとの列が動的に追加されます -->
                                     </tr>
                                 </thead>
                                 <tbody id="rawDataTable" class="divide-y divide-[#808080] font-mono text-[13px]">
@@ -385,18 +400,21 @@
                         </div>
                     </div>
                 </div>
-                
+
+                <!-- 新設: 統計・信頼性分析ツール -->
                 <div class="w-[320px] flex-shrink-0 h-full flex flex-col">
                     <div class="win-outset h-full flex flex-col">
                         <div class="win-titlebar flex items-center justify-between">
                             <span class="flex items-center gap-1"><i class="ph ph-chart-line-up"></i> 統計・信頼性分析ツール</span>
                             <div class="flex gap-1">
                                 <button class="win-btn w-4 h-4 flex items-center justify-center">
+                                    <!-- ドット風 最小化ボタン -->
                                     <svg width="6" height="2" viewBox="0 0 6 2" fill="none" xmlns="http://www.w3.org/2000/svg" class="align-middle">
                                         <rect width="6" height="2" fill="black"/>
                                     </svg>
                                 </button>
                                 <button class="win-btn w-4 h-4 flex items-center justify-center">
+                                    <!-- ドット風 閉じるボタン -->
                                     <svg width="6" height="6" viewBox="0 0 6 6" fill="none" xmlns="http://www.w3.org/2000/svg" class="align-middle">
                                         <path d="M0.5 0.5L5.5 5.5M5.5 0.5L0.5 5.5" stroke="black" stroke-width="1.5"/>
                                     </svg>
@@ -418,6 +436,7 @@
                             <fieldset class="win-groupbox flex-1 flex flex-col mt-0">
                                 <legend>議案別 賛成率比較</legend>
                                 <div class="mt-1 space-y-3 font-mono text-[11px] flex-1 text-black" id="agendaCompareChart">
+                                    <!-- 棒グラフがここに描画されます -->
                                     <div class="text-[#808080] text-center pt-4">データ待機中...</div>
                                 </div>
                             </fieldset>
@@ -442,6 +461,10 @@
         let currentUser = null;
         let currentVoteDocs = []; 
         let currentAgendas = [];
+        
+        // 追加: データのロード状態を管理するフラグ
+        let votesLoaded = false;
+        let agendasLoaded = false;
 
         const loadSettings = () => {
             const tc = localStorage.getItem('settingTotalClasses');
@@ -454,17 +477,18 @@
             localStorage.setItem('settingTotalStudents', document.getElementById('inputTotalStudents').value);
         };
 
+        // 修正: データが両方ロードされている場合のみ再描画を実行するように変更
         document.getElementById('inputTotalClasses').addEventListener('input', () => {
             saveSettings();
-            if (currentVoteDocs.length >= 0) processAndRenderData(currentVoteDocs, currentAgendas);
+            if (votesLoaded && agendasLoaded) processAndRenderData(currentVoteDocs, currentAgendas);
         });
         document.getElementById('inputTotalStudents').addEventListener('input', () => {
             saveSettings();
-            if (currentVoteDocs.length >= 0) processAndRenderData(currentVoteDocs, currentAgendas);
+            if (votesLoaded && agendasLoaded) processAndRenderData(currentVoteDocs, currentAgendas);
         });
         document.querySelectorAll('input[name="viewMode"]').forEach(radio => {
             radio.addEventListener('change', () => {
-                if (currentVoteDocs.length >= 0) processAndRenderData(currentVoteDocs, currentAgendas);
+                if (votesLoaded && agendasLoaded) processAndRenderData(currentVoteDocs, currentAgendas);
             });
         });
 
@@ -525,6 +549,8 @@
 
         const initFirebase = async () => {
             try {
+                // ！！！ 注意 ！！！
+                // 以下の firebaseConfig の中身を、ご自身のFirebaseの設定コードに書き換えてください。
                 const firebaseConfig = {
                     apiKey: "AIzaSyCNbylYM-96elHEwq122riR48ZRc-mU_B8",
                     authDomain: "v-s-system.firebaseapp.com",
@@ -572,8 +598,7 @@
             const votesCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'votes');
             const agendasCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'agendas');
 
-            let votesLoaded = false;
-            let agendasLoaded = false;
+            // 修正: フラグの初期化を削除（グローバルで管理するため）
 
             onSnapshot(votesCollectionRef, (snapshot) => {
                 const voteDocs = [];
@@ -608,6 +633,7 @@
             if (!population || population <= 0 || sampleSize <= 0) return null;
             if (sampleSize >= population) return 0;
             
+            // 95%信頼区間, Z=1.96, p=0.5で最大誤差を計算
             const z = 1.96;
             const p = 0.5;
             const popFactor = (population - sampleSize) / (population - 1);
@@ -674,6 +700,7 @@
                 agendaTotals[ag.number] = { yes: 0, no: 0, totalAttendedForVoting: 0, theme: ag.theme || '' };
             });
 
+            // テーブルヘッダーの動的生成
             const thead = document.getElementById('tableHeader');
             let theadHtml = `
                 <tr class="text-black font-bold border-b-2 border-[#808080] shadow-sm">
