@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>生徒会管理コンソール - データエディタ [Version 0.11]</title>
+    <title>生徒会管理コンソール - データエディタ [Version 0.31]</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -156,7 +156,7 @@
                 <i class="ph-bold ph-database text-xl text-[#000080]"></i>
                 <div class="font-bold">
                     <span class="text-black">生徒会管理コンソール -</span> 
-                    <span class="text-[#000080]">投票データエディタ [Version 0.11]</span>
+                    <span class="text-[#000080]">投票データエディタ [Version 0.31]</span>
                 </div>
             </div>
             <div class="flex items-center gap-4">
@@ -244,50 +244,9 @@
 
                         <fieldset class="win-groupbox bg-[#c0c0c0]">
                             <legend>投票データ (完了ステータス時のみ有効)</legend>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div class="win-inset p-2 bg-[#c0c0c0]">
-                                    <div class="font-bold text-[#000080] mb-2 border-b border-[#808080] pb-1">第1号議案</div>
-                                    <div class="flex items-center justify-between mb-1">
-                                        <span>賛成票:</span>
-                                        <input type="number" id="editAg1Yes" class="win-inset w-16 p-0.5 bg-white text-right" min="0" value="0">
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <span>反対票:</span>
-                                        <input type="number" id="editAg1No" class="win-inset w-16 p-0.5 bg-white text-right" min="0" value="0">
-                                    </div>
-                                </div>
-                                <div class="win-inset p-2 bg-[#c0c0c0]">
-                                    <div class="font-bold text-[#000080] mb-2 border-b border-[#808080] pb-1">第2号議案</div>
-                                    <div class="flex items-center justify-between mb-1">
-                                        <span>賛成票:</span>
-                                        <input type="number" id="editAg2Yes" class="win-inset w-16 p-0.5 bg-white text-right" min="0" value="0">
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <span>反対票:</span>
-                                        <input type="number" id="editAg2No" class="win-inset w-16 p-0.5 bg-white text-right" min="0" value="0">
-                                    </div>
-                                </div>
-                                <div class="win-inset p-2 bg-[#c0c0c0]">
-                                    <div class="font-bold text-[#000080] mb-2 border-b border-[#808080] pb-1">第3号議案</div>
-                                    <div class="flex items-center justify-between mb-1">
-                                        <span>賛成票:</span>
-                                        <input type="number" id="editAg3Yes" class="win-inset w-16 p-0.5 bg-white text-right" min="0" value="0">
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <span>反対票:</span>
-                                        <input type="number" id="editAg3No" class="win-inset w-16 p-0.5 bg-white text-right" min="0" value="0">
-                                    </div>
-                                </div>
-                                <div class="win-inset p-2 bg-[#c0c0c0]">
-                                    <div class="font-bold text-[#000080] mb-2 border-b border-[#808080] pb-1">第4号議案</div>
-                                    <div class="flex items-center justify-between mb-1">
-                                        <span>賛成票:</span>
-                                        <input type="number" id="editAg4Yes" class="win-inset w-16 p-0.5 bg-white text-right" min="0" value="0">
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <span>反対票:</span>
-                                        <input type="number" id="editAg4No" class="win-inset w-16 p-0.5 bg-white text-right" min="0" value="0">
-                                    </div>
+                            <div class="grid grid-cols-2 gap-4" id="agendasInputContainer">
+                                <div class="col-span-2 text-center text-[#808080] py-4">
+                                    <i class="ph ph-spinner animate-spin text-lg mr-1 align-middle"></i> 議題データを読み込み中...
                                 </div>
                             </div>
                         </fieldset>
@@ -343,6 +302,7 @@
         let currentUser = null;
         let currentDocsMap = {}; 
         let selectedDocId = null;
+        let currentAgendas = [];
 
         const updateClock = () => {
             const clockEl = document.getElementById('systemClock');
@@ -422,6 +382,7 @@
             if (!currentUser) return;
 
             const votesCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'votes');
+            const agendasCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'agendas');
 
             onSnapshot(votesCollectionRef, (snapshot) => {
                 const map = {};
@@ -431,9 +392,62 @@
                 currentDocsMap = map;
                 renderList();
             }, (error) => {
-                console.error("Firestore Listen Error:", error);
+                console.error("Firestore Listen Error (votes):", error);
                 setAlert(`データ受信エラー: ${error.message}`, true);
             });
+
+            onSnapshot(agendasCollectionRef, (snapshot) => {
+                const agendas = [];
+                snapshot.forEach((doc) => {
+                    agendas.push({ id: doc.id, ...doc.data() });
+                });
+                currentAgendas = agendas.sort((a, b) => (a.number || 0) - (b.number || 0));
+                renderAgendasInput();
+            }, (error) => {
+                console.error("Firestore Listen Error (agendas):", error);
+                setAlert(`議題データ受信エラー: ${error.message}`, true);
+            });
+        };
+
+        const renderAgendasInput = () => {
+            const container = document.getElementById('agendasInputContainer');
+            if (currentAgendas.length === 0) {
+                container.innerHTML = `<div class="col-span-2 text-center text-[#808080] py-4">議題が設定されていません。</div>`;
+                return;
+            }
+
+            let html = '';
+            currentAgendas.forEach(ag => {
+                const num = ag.number;
+                const theme = ag.theme || '';
+                html += `
+                    <div class="win-inset p-2 bg-[#c0c0c0]">
+                        <div class="font-bold text-[#000080] border-b border-[#808080] pb-1 mb-1">第${num}号議案</div>
+                        <div class="text-[10px] text-black mb-2 truncate w-full" title="${theme}">${theme ? `「${theme}」` : '（テーマ未設定）'}</div>
+                        <div class="flex items-center justify-between mb-1 text-black">
+                            <span>賛成票:</span>
+                            <input type="number" id="editAg${num}Yes" class="win-inset w-16 p-0.5 bg-white text-right text-black" min="0" value="0">
+                        </div>
+                        <div class="flex items-center justify-between text-black">
+                            <span>反対票:</span>
+                            <input type="number" id="editAg${num}No" class="win-inset w-16 p-0.5 bg-white text-right text-black" min="0" value="0">
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+
+            if (selectedDocId && currentDocsMap[selectedDocId]) {
+                currentAgendas.forEach(ag => {
+                    const num = ag.number;
+                    const data = currentDocsMap[selectedDocId];
+                    const agenda = data[`agenda${num}`] || { yes: 0, no: 0 };
+                    const yesInput = document.getElementById(`editAg${num}Yes`);
+                    const noInput = document.getElementById(`editAg${num}No`);
+                    if(yesInput) yesInput.value = agenda.yes;
+                    if(noInput) noInput.value = agenda.no;
+                });
+            }
         };
 
         const renderList = () => {
@@ -501,11 +515,14 @@
                 document.getElementById('editTotal').value = data.totalStudents || 0;
                 document.getElementById('editAttended').value = data.attendedStudents || 0;
 
-                for (let i = 1; i <= 4; i++) {
-                    const agenda = data[`agenda${i}`] || { yes: 0, no: 0 };
-                    document.getElementById(`editAg${i}Yes`).value = agenda.yes;
-                    document.getElementById(`editAg${i}No`).value = agenda.no;
-                }
+                currentAgendas.forEach(ag => {
+                    const num = ag.number;
+                    const agenda = data[`agenda${num}`] || { yes: 0, no: 0 };
+                    const yesInput = document.getElementById(`editAg${num}Yes`);
+                    const noInput = document.getElementById(`editAg${num}No`);
+                    if(yesInput) yesInput.value = agenda.yes;
+                    if(noInput) noInput.value = agenda.no;
+                });
                 
                 renderList(); 
             }
@@ -528,24 +545,18 @@
                 className: className,
                 step: parseInt(document.getElementById('editStep').value, 10),
                 totalStudents: parseInt(document.getElementById('editTotal').value, 10) || 0,
-                attendedStudents: parseInt(document.getElementById('editAttended').value, 10) || 0,
-                agenda1: {
-                    yes: parseInt(document.getElementById('editAg1Yes').value, 10) || 0,
-                    no: parseInt(document.getElementById('editAg1No').value, 10) || 0
-                },
-                agenda2: {
-                    yes: parseInt(document.getElementById('editAg2Yes').value, 10) || 0,
-                    no: parseInt(document.getElementById('editAg2No').value, 10) || 0
-                },
-                agenda3: {
-                    yes: parseInt(document.getElementById('editAg3Yes').value, 10) || 0,
-                    no: parseInt(document.getElementById('editAg3No').value, 10) || 0
-                },
-                agenda4: {
-                    yes: parseInt(document.getElementById('editAg4Yes').value, 10) || 0,
-                    no: parseInt(document.getElementById('editAg4No').value, 10) || 0
-                }
+                attendedStudents: parseInt(document.getElementById('editAttended').value, 10) || 0
             };
+
+            currentAgendas.forEach(ag => {
+                const num = ag.number;
+                const yesInput = document.getElementById(`editAg${num}Yes`);
+                const noInput = document.getElementById(`editAg${num}No`);
+                data[`agenda${num}`] = {
+                    yes: yesInput ? (parseInt(yesInput.value, 10) || 0) : 0,
+                    no: noInput ? (parseInt(noInput.value, 10) || 0) : 0
+                };
+            });
 
             const btn = document.getElementById('btnSave');
             btn.disabled = true;
