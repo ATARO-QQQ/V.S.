@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>生徒総会 投票結果集計システム [Version 0.2]</title>
+    <title>生徒総会 投票結果集計システム [Version 0.21]</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -51,15 +51,8 @@
         }
 
         .win-titlebar {
-            background: linear-gradient(90deg, 
-                #000080 0%, #000080 14%,
-                #08249b 14%, #08249b 28%,
-                #0d41b1 28%, #0d41b1 42%,
-                #115ac4 42%, #115ac4 57%,
-                #1571d4 57%, #1571d4 71%,
-                #1987e2 71%, #1987e2 85%,
-                #1d9cee 85%, #1d9cee 100%
-            );
+            background-color: #000080;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" preserveAspectRatio="none"><defs><pattern id="p1" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="%23000080"/><rect x="0" y="0" width="1" height="1" fill="%230000ff"/><rect x="2" y="2" width="1" height="1" fill="%230000ff"/></pattern><pattern id="p2" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="%23000080"/><rect x="0" y="0" width="1" height="1" fill="%230000ff"/><rect x="2" y="2" width="1" height="1" fill="%230000ff"/><rect x="2" y="0" width="1" height="1" fill="%230000ff"/><rect x="0" y="2" width="1" height="1" fill="%230000ff"/></pattern><pattern id="p3" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="%23000080"/><rect x="0" y="0" width="1" height="1" fill="%230000ff"/><rect x="2" y="0" width="1" height="1" fill="%230000ff"/><rect x="0" y="2" width="1" height="1" fill="%230000ff"/><rect x="2" y="2" width="1" height="1" fill="%230000ff"/><rect x="1" y="1" width="1" height="1" fill="%230000ff"/><rect x="3" y="3" width="1" height="1" fill="%230000ff"/></pattern><pattern id="p4" width="2" height="2" patternUnits="userSpaceOnUse"><rect width="2" height="2" fill="%23000080"/><rect x="0" y="0" width="1" height="1" fill="%230000ff"/><rect x="1" y="1" width="1" height="1" fill="%230000ff"/></pattern><pattern id="p5" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="%230000ff"/><rect x="0" y="0" width="1" height="1" fill="%23000080"/><rect x="2" y="0" width="1" height="1" fill="%23000080"/><rect x="0" y="2" width="1" height="1" fill="%23000080"/><rect x="2" y="2" width="1" height="1" fill="%23000080"/><rect x="1" y="1" width="1" height="1" fill="%23000080"/><rect x="3" y="3" width="1" height="1" fill="%23000080"/></pattern><pattern id="p6" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="%230000ff"/><rect x="0" y="0" width="1" height="1" fill="%23000080"/><rect x="2" y="2" width="1" height="1" fill="%23000080"/><rect x="2" y="0" width="1" height="1" fill="%23000080"/><rect x="0" y="2" width="1" height="1" fill="%23000080"/></pattern><pattern id="p7" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="%230000ff"/><rect x="0" y="0" width="1" height="1" fill="%23000080"/><rect x="2" y="2" width="1" height="1" fill="%23000080"/></pattern></defs><rect x="0%" y="0" width="11.1%" height="100%" fill="%23000080"/><rect x="11.1%" y="0" width="11.1%" height="100%" fill="url(%23p1)"/><rect x="22.2%" y="0" width="11.1%" height="100%" fill="url(%23p2)"/><rect x="33.3%" y="0" width="11.1%" height="100%" fill="url(%23p3)"/><rect x="44.4%" y="0" width="11.2%" height="100%" fill="url(%23p4)"/><rect x="55.5%" y="0" width="11.1%" height="100%" fill="url(%23p5)"/><rect x="66.6%" y="0" width="11.1%" height="100%" fill="url(%23p6)"/><rect x="77.7%" y="0" width="11.1%" height="100%" fill="url(%23p7)"/><rect x="88.8%" y="0" width="11.2%" height="100%" fill="%230000ff"/></svg>');
             color: #ffffff;
             padding: 2px 4px;
             font-size: 12px;
@@ -77,13 +70,13 @@
         .win-groupbox legend {
             padding: 0 4px;
             font-size: 12px;
-            color: #000;
+            color: #000000;
         }
 
         ::-webkit-scrollbar {
             width: 16px;
             height: 16px;
-            background: #dfdfdf;
+            background: #c0c0c0;
         }
         ::-webkit-scrollbar-thumb {
             background: #c0c0c0;
@@ -93,10 +86,12 @@
             border-bottom: 1.5px solid #808080;
         }
         ::-webkit-scrollbar-track {
-            background-image: radial-gradient(#c0c0c0 25%, transparent 25%), radial-gradient(#ffffff 25%, transparent 25%);
-            background-size: 4px 4px;
-            background-position: 0 0, 2px 2px;
-            background-color: #dfdfdf;
+            background-color: #c0c0c0;
+            background-image: 
+                linear-gradient(45deg, #ffffff 25%, transparent 25%, transparent 75%, #ffffff 75%, #ffffff), 
+                linear-gradient(45deg, #ffffff 25%, transparent 25%, transparent 75%, #ffffff 75%, #ffffff);
+            background-size: 2px 2px;
+            background-position: 0 0, 1px 1px;
         }
 
         .win-progress-track {
@@ -118,7 +113,7 @@
         }
 
         @keyframes spin-blocks {
-            0%, 100% { background-color: #dfdfdf; box-shadow: inset -1px -1px 0 #fff, inset 1px 1px 0 #808080; }
+            0%, 100% { background-color: #c0c0c0; box-shadow: inset -1px -1px 0 #ffffff, inset 1px 1px 0 #808080; }
             25% { background-color: #000080; box-shadow: none; }
         }
         .classic-spinner {
@@ -130,13 +125,40 @@
             gap: 1px;
         }
         .s-block {
-            background-color: #dfdfdf;
-            box-shadow: inset -1px -1px 0 #fff, inset 1px 1px 0 #808080;
+            background-color: #c0c0c0;
+            box-shadow: inset -1px -1px 0 #ffffff, inset 1px 1px 0 #808080;
         }
         .classic-spinner .s-block:nth-child(1) { animation: spin-blocks 1.2s infinite; animation-delay: 0s; }
         .classic-spinner .s-block:nth-child(2) { animation: spin-blocks 1.2s infinite; animation-delay: 0.3s; }
         .classic-spinner .s-block:nth-child(4) { animation: spin-blocks 1.2s infinite; animation-delay: 0.6s; }
         .classic-spinner .s-block:nth-child(3) { animation: spin-blocks 1.2s infinite; animation-delay: 0.9s; }
+
+        .classic-radio {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #ffffff;
+            border-top: 2px solid #808080;
+            border-left: 2px solid #808080;
+            border-right: 2px solid #ffffff;
+            border-bottom: 2px solid #ffffff;
+            box-shadow: inset 1px 1px 0px #000000;
+            position: relative;
+            outline: none;
+            cursor: pointer;
+            flex-shrink: 0;
+            image-rendering: pixelated;
+        }
+        .classic-radio:checked::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 4px;
+            height: 4px;
+            background-color: #000000;
+        }
     </style>
 </head>
 <body class="p-4 min-h-screen text-black overflow-x-hidden">
@@ -145,16 +167,15 @@
         
         <header class="win-outset flex items-center justify-between p-1.5 mb-2">
             <div class="flex items-center gap-2">
-                <i class="ph-bold ph-monitor text-xl text-blue-900"></i>
+                <i class="ph-bold ph-monitor text-xl text-[#000080]"></i>
                 <div class="font-bold">
-                    <span class="text-slate-700">生徒会管理コンソール -</span> 
-                    <span class="text-blue-900">投票結果集計ビューアー [Version 0.2]</span>
+                    <span class="text-black">生徒会管理コンソール -</span> 
+                    <span class="text-[#000080]">投票結果集計ビューアー [Version 0.21]</span>
                 </div>
             </div>
             <div class="flex items-center gap-4">
                 
-                <!-- 新設: 投票中インジケーター -->
-                <div id="globalVotingStatus" class="win-inset px-2 py-0.5 bg-[#ece9d8] flex items-center gap-2 shadow-[inset_1px_1px_0_#808080,inset_-1px_-1px_0_#fff]">
+                <div id="globalVotingStatus" class="win-inset px-2 py-0.5 bg-[#c0c0c0] flex items-center gap-2 shadow-[inset_1px_1px_0_#808080,inset_-1px_-1px_0_#ffffff]">
                     <div class="classic-spinner" id="globalSpinner">
                         <div class="s-block"></div><div class="s-block"></div>
                         <div class="s-block"></div><div class="s-block"></div>
@@ -163,30 +184,29 @@
                 </div>
 
                 <div class="flex gap-2">
-                    <a href="https://ataro-qqq.github.io/V.S./viewer/" class="win-inset px-2 py-0.5 font-bold flex items-center gap-1 text-gray-600 bg-[#dfdfdf] pointer-events-none select-none text-xs">
+                    <a href="https://ataro-qqq.github.io/V.S./viewer/" class="win-inset px-2 py-0.5 font-bold flex items-center gap-1 text-[#808080] bg-[#c0c0c0] pointer-events-none select-none text-xs">
                         <i class="ph ph-chart-bar"></i> ビューアー
                     </a>
-                    <a href="https://ataro-qqq.github.io/V.S./editor/" class="win-btn px-2 py-0.5 font-bold flex items-center gap-1 text-black hover:bg-[#e0e0e0] text-xs">
+                    <a href="https://ataro-qqq.github.io/V.S./editor/" class="win-btn px-2 py-0.5 font-bold flex items-center gap-1 text-black hover:bg-[#ffffff] text-xs">
                         <i class="ph ph-pencil"></i> エディタ
                     </a>
                 </div>
-                <div class="flex items-center gap-2 text-slate-700 font-mono text-xs pr-2" id="systemClock">
+                <div class="flex items-center gap-2 text-black font-mono text-xs pr-2" id="systemClock">
                     2026-07-15 15:00:00 JST
                 </div>
             </div>
         </header>
 
-        <div id="statusAlert" class="win-outset p-2 hidden flex items-start gap-2 bg-[#ffffcc] border-l-4 border-yellow-600">
-            <i class="ph-fill ph-info text-yellow-700 text-lg"></i>
+        <div id="statusAlert" class="win-outset p-2 hidden flex items-start gap-2 bg-[#ffff00] border-l-4 border-[#808000]">
+            <i class="ph-fill ph-info text-[#808000] text-lg"></i>
             <div>
-                <span class="font-bold block">システムアナウンスメント:</span>
-                <span id="alertMessage">データベースに接続中...</span>
+                <span class="font-bold block text-black">システムアナウンスメント:</span>
+                <span id="alertMessage" class="text-black">データベースに接続中...</span>
             </div>
         </div>
 
         <div class="flex flex-col gap-4">
             
-            <!-- 上段: システム状況 & 集計 -->
             <div class="flex flex-row gap-4 h-[440px]">
                 
                 <div class="w-[320px] flex-shrink-0 flex flex-col gap-4 h-full">
@@ -194,8 +214,16 @@
                         <div class="win-titlebar flex items-center justify-between">
                             <span class="flex items-center gap-1"><i class="ph ph-cpu"></i> システム状況</span>
                             <div class="flex gap-1">
-                                <button class="win-btn w-4 h-4 flex items-center justify-center text-black font-bold font-mono">_</button>
-                                <button class="win-btn w-4 h-4 flex items-center justify-center text-black font-bold font-mono">X</button>
+                                <button class="win-btn w-4 h-4 flex items-center justify-center">
+                                    <svg width="6" height="2" viewBox="0 0 6 2" fill="none" xmlns="http://www.w3.org/2000/svg" class="align-middle">
+                                        <rect width="6" height="2" fill="black"/>
+                                    </svg>
+                                </button>
+                                <button class="win-btn w-4 h-4 flex items-center justify-center">
+                                    <svg width="6" height="6" viewBox="0 0 6 6" fill="none" xmlns="http://www.w3.org/2000/svg" class="align-middle">
+                                        <path d="M0.5 0.5L5.5 5.5M5.5 0.5L0.5 5.5" stroke="black" stroke-width="1.5"/>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                         
@@ -205,54 +233,54 @@
                                 <legend>全体設定 (手動入力)</legend>
                                 <div class="space-y-2 mt-1">
                                     <label class="flex items-center justify-between">
-                                        <span class="font-bold text-slate-800">全校クラス数:</span>
-                                        <input type="number" id="inputTotalClasses" value="0" min="1" class="win-inset w-16 p-0.5 text-right bg-white font-mono border-none outline-none">
+                                        <span class="font-bold text-black">全校クラス数:</span>
+                                        <input type="number" id="inputTotalClasses" value="0" min="1" class="win-inset w-16 p-0.5 text-right bg-[#ffffff] text-black font-mono border-none outline-none">
                                     </label>
                                     <label class="flex items-center justify-between">
-                                        <span class="font-bold text-slate-800">全校生徒数:</span>
-                                        <input type="number" id="inputTotalStudents" value="0" min="1" class="win-inset w-16 p-0.5 text-right bg-white font-mono border-none outline-none">
+                                        <span class="font-bold text-black">全校生徒数:</span>
+                                        <input type="number" id="inputTotalStudents" value="0" min="1" class="win-inset w-16 p-0.5 text-right bg-[#ffffff] text-black font-mono border-none outline-none">
                                     </label>
                                 </div>
                             </fieldset>
 
                             <div class="pt-2 mb-2">
-                                <span class="text-slate-600 block mb-1">現在の接続ステータス:</span>
-                                <div class="win-inset p-1 bg-slate-100 font-mono flex items-center gap-2">
-                                    <span class="inline-block w-3 h-3 rounded-full bg-red-500" id="dbIndicator"></span>
-                                    <span id="dbStatusText">オフライン/接続未確立</span>
+                                <span class="text-[#808080] block mb-1">現在の接続ステータス:</span>
+                                <div class="win-inset p-1 bg-[#ffffff] font-mono flex items-center gap-2">
+                                    <span class="inline-block w-3 h-3 rounded-full bg-[#ff0000]" id="dbIndicator"></span>
+                                    <span id="dbStatusText" class="text-black">オフライン/接続未確立</span>
                                 </div>
                             </div>
 
-                            <div class="border-t border-slate-300 pt-2 mb-2">
-                                <span class="text-slate-600 block mb-1">報告完了クラス進捗:</span>
+                            <div class="border-t border-[#808080] pt-2 mb-2">
+                                <span class="text-[#808080] block mb-1">報告完了クラス進捗:</span>
                                 <div class="flex justify-between items-end mb-1">
                                     <div class="text-2xl font-mono font-bold text-[#000080]" id="totalClasses">0 / 0</div>
-                                    <div class="font-mono text-xs" id="classRateText">0%</div>
+                                    <div class="font-mono text-xs text-black" id="classRateText">0%</div>
                                 </div>
                                 <div class="w-full h-5 win-progress-track">
                                     <div id="completionBar" class="h-full win-chunk-blue transition-all duration-300" style="width: 0%;"></div>
                                 </div>
                             </div>
 
-                            <div class="border-t border-slate-300 pt-2 space-y-1 mt-auto">
-                                <h3 class="font-bold text-slate-800">全校出席率統計</h3>
+                            <div class="border-t border-[#808080] pt-2 space-y-1 mt-auto">
+                                <h3 class="font-bold text-black">全校出席率統計</h3>
                                 <div class="grid grid-cols-3 gap-1 text-center">
-                                    <div class="win-inset p-1 bg-white flex flex-col justify-center">
-                                        <span class="text-[10px] text-slate-500 block">在籍総数</span>
+                                    <div class="win-inset p-1 bg-[#ffffff] flex flex-col justify-center">
+                                        <span class="text-[10px] text-[#808080] block">在籍総数</span>
                                         <span class="text-sm font-mono font-bold text-[#000080]" id="statTotal">0</span>
                                     </div>
-                                    <div class="win-inset p-1 bg-white flex flex-col justify-center">
-                                        <span class="text-[10px] text-slate-500 block">出席者数</span>
+                                    <div class="win-inset p-1 bg-[#ffffff] flex flex-col justify-center">
+                                        <span class="text-[10px] text-[#808080] block">出席者数</span>
                                         <span class="text-sm font-mono font-bold text-[#008000]" id="statAttended">0</span>
                                     </div>
-                                    <div class="win-inset p-1 bg-white flex flex-col justify-center">
-                                        <span class="text-[10px] text-slate-500 block">欠席者数</span>
+                                    <div class="win-inset p-1 bg-[#ffffff] flex flex-col justify-center">
+                                        <span class="text-[10px] text-[#808080] block">欠席者数</span>
                                         <span class="text-sm font-mono font-bold text-[#800000]" id="statAbsent">0</span>
                                     </div>
                                 </div>
-                                <div class="mt-1 text-right border-t border-dotted border-slate-400 pt-1">
-                                    <span class="text-slate-600">全校出席率: </span>
-                                    <span class="font-bold font-mono" id="statAttendanceRate">0.00%</span>
+                                <div class="mt-1 text-right border-t border-dotted border-[#808080] pt-1">
+                                    <span class="text-[#808080]">全校出席率: </span>
+                                    <span class="font-bold font-mono text-black" id="statAttendanceRate">0.00%</span>
                                 </div>
                             </div>
                         </div>
@@ -264,30 +292,38 @@
                         <div class="win-titlebar flex items-center justify-between">
                             <span class="flex items-center gap-1"><i class="ph ph-chart-bar"></i> 決議結果集計</span>
                             <div class="flex gap-1">
-                                <button class="win-btn w-4 h-4 flex items-center justify-center text-black font-bold font-mono">_</button>
-                                <button class="win-btn w-4 h-4 flex items-center justify-center text-black font-bold font-mono">X</button>
+                                <button class="win-btn w-4 h-4 flex items-center justify-center">
+                                    <svg width="6" height="2" viewBox="0 0 6 2" fill="none" xmlns="http://www.w3.org/2000/svg" class="align-middle">
+                                        <rect width="6" height="2" fill="black"/>
+                                    </svg>
+                                </button>
+                                <button class="win-btn w-4 h-4 flex items-center justify-center">
+                                    <svg width="6" height="6" viewBox="0 0 6 6" fill="none" xmlns="http://www.w3.org/2000/svg" class="align-middle">
+                                        <path d="M0.5 0.5L5.5 5.5M5.5 0.5L0.5 5.5" stroke="black" stroke-width="1.5"/>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
 
                         <div class="p-3 flex-1 flex flex-col">
                             <fieldset class="win-groupbox mb-2 mt-0">
                                 <legend>数直線の集計基準</legend>
-                                <div class="flex flex-wrap gap-x-6 gap-y-2 mt-1 font-bold text-slate-800">
+                                <div class="flex flex-wrap gap-x-6 gap-y-2 mt-1 font-bold text-black">
                                     <label class="flex items-center gap-1 cursor-pointer">
-                                        <input type="radio" name="viewMode" value="attended" checked class="cursor-pointer">
+                                        <input type="radio" name="viewMode" value="attended" checked class="classic-radio">
                                         <span>出席者ベース (現在の報告完了分)</span>
                                     </label>
                                     <label class="flex items-center gap-1 cursor-pointer">
-                                        <input type="radio" name="viewMode" value="total" class="cursor-pointer">
+                                        <input type="radio" name="viewMode" value="total" class="classic-radio">
                                         <span>全校生徒ベース (未回答は棄権扱い)</span>
                                     </label>
                                 </div>
                             </fieldset>
 
-                            <div class="flex gap-4 justify-end border-b border-slate-400 pb-1 mb-3">
-                                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-[#000080] inline-block border border-black"></span> 賛成</span>
-                                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-[#800000] inline-block border border-black"></span> 反対</span>
-                                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-[#808080] inline-block border border-black"></span> 棄権/無効</span>
+                            <div class="flex gap-4 justify-end border-b border-[#808080] pb-1 mb-3 text-black">
+                                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-[#000080] inline-block border border-[#000000]"></span> 賛成</span>
+                                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-[#800000] inline-block border border-[#000000]"></span> 反対</span>
+                                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-[#808080] inline-block border border-[#000000]"></span> 棄権/無効</span>
                             </div>
 
                             <div id="agendasContainer" class="grid grid-cols-2 gap-x-6 gap-y-4 flex-1 overflow-y-auto pr-1">
@@ -305,38 +341,46 @@
                         <div class="win-titlebar flex items-center justify-between">
                             <span class="flex items-center gap-1"><i class="ph ph-table"></i> クラス別報告一覧</span>
                             <div class="flex gap-1">
-                                <button class="win-btn w-4 h-4 flex items-center justify-center text-black font-bold font-mono">_</button>
-                                <button class="win-btn w-4 h-4 flex items-center justify-center text-black font-bold font-mono">X</button>
+                                <button class="win-btn w-4 h-4 flex items-center justify-center">
+                                    <svg width="6" height="2" viewBox="0 0 6 2" fill="none" xmlns="http://www.w3.org/2000/svg" class="align-middle">
+                                        <rect width="6" height="2" fill="black"/>
+                                    </svg>
+                                </button>
+                                <button class="win-btn w-4 h-4 flex items-center justify-center">
+                                    <svg width="6" height="6" viewBox="0 0 6 6" fill="none" xmlns="http://www.w3.org/2000/svg" class="align-middle">
+                                        <path d="M0.5 0.5L5.5 5.5M5.5 0.5L0.5 5.5" stroke="black" stroke-width="1.5"/>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                         
-                        <div class="p-1.5 bg-[#dfdfdf] border-b border-slate-300 flex items-center gap-2">
-                            <span class="font-bold text-slate-700 ml-1">操作メニュー:</span>
-                            <button onclick="location.reload()" class="win-btn px-2 py-0.5 font-bold flex items-center gap-1 hover:bg-slate-100 focus:outline-none">
+                        <div class="p-1.5 bg-[#c0c0c0] border-b border-[#808080] flex items-center gap-2">
+                            <span class="font-bold text-black ml-1">操作メニュー:</span>
+                            <button onclick="location.reload()" class="win-btn px-2 py-0.5 font-bold flex items-center gap-1 hover:bg-[#ffffff] focus:outline-none">
                                 <i class="ph ph-arrow-counter-clockwise"></i> リロード
                             </button>
-                            <div class="h-4 w-px bg-slate-400 mx-1"></div>
-                            <span class="text-slate-600 font-mono text-xs" id="dataCount">取得数: 0 クラス</span>
+                            <div class="h-4 w-px bg-[#808080] mx-1"></div>
+                            <span class="text-[#808080] font-mono text-xs" id="dataCount">取得数: 0 クラス</span>
                         </div>
 
-                        <div class="overflow-y-auto flex-1 bg-white relative">
-                            <table class="w-full border-collapse text-left bg-white">
-                                <thead class="sticky top-0 z-10 bg-slate-200">
-                                    <tr class="text-slate-800 font-bold border-b-2 border-slate-400 shadow-sm">
-                                        <th class="p-1.5 border-r border-slate-300 text-center w-16">状態</th>
-                                        <th class="p-1.5 border-r border-slate-300">クラス名</th>
-                                        <th class="p-1.5 border-r border-slate-300 text-right">在籍数</th>
-                                        <th class="p-1.5 border-r border-slate-300 text-right">出席数</th>
-                                        <th class="p-1.5 border-r border-slate-300 text-right">欠席数</th>
-                                        <th class="p-1.5 border-r border-slate-300 text-center">第1号(賛/反)</th>
-                                        <th class="p-1.5 border-r border-slate-300 text-center">第2号(賛/反)</th>
-                                        <th class="p-1.5 border-r border-slate-300 text-center">第3号(賛/反)</th>
-                                        <th class="p-1.5 border-r border-slate-300 text-center">第4号(賛/反)</th>
+                        <div class="overflow-y-auto flex-1 bg-[#ffffff] relative">
+                            <table class="w-full border-collapse text-left bg-[#ffffff]">
+                                <thead class="sticky top-0 z-10 bg-[#c0c0c0]">
+                                    <tr class="text-black font-bold border-b-2 border-[#808080] shadow-sm">
+                                        <th class="p-1.5 border-r border-[#808080] text-center w-16">状態</th>
+                                        <th class="p-1.5 border-r border-[#808080]">クラス名</th>
+                                        <th class="p-1.5 border-r border-[#808080] text-right">在籍数</th>
+                                        <th class="p-1.5 border-r border-[#808080] text-right">出席数</th>
+                                        <th class="p-1.5 border-r border-[#808080] text-right">欠席数</th>
+                                        <th class="p-1.5 border-r border-[#808080] text-center">第1号(賛/反)</th>
+                                        <th class="p-1.5 border-r border-[#808080] text-center">第2号(賛/反)</th>
+                                        <th class="p-1.5 border-r border-[#808080] text-center">第3号(賛/反)</th>
+                                        <th class="p-1.5 border-r border-[#808080] text-center">第4号(賛/反)</th>
                                     </tr>
                                 </thead>
-                                <tbody id="rawDataTable" class="divide-y divide-slate-200 font-mono text-[13px]">
+                                <tbody id="rawDataTable" class="divide-y divide-[#808080] font-mono text-[13px]">
                                     <tr>
-                                        <td colspan="9" class="p-4 text-center text-slate-500 bg-slate-50">
+                                        <td colspan="9" class="p-4 text-center text-[#808080] bg-[#ffffff]">
                                             <i class="ph ph-spinner animate-spin text-lg mr-1 align-middle"></i> データベース同期中...
                                         </td>
                                     </tr>
@@ -351,26 +395,34 @@
                         <div class="win-titlebar flex items-center justify-between">
                             <span class="flex items-center gap-1"><i class="ph ph-chart-line-up"></i> 統計・信頼性分析ツール</span>
                             <div class="flex gap-1">
-                                <button class="win-btn w-4 h-4 flex items-center justify-center text-black font-bold font-mono">_</button>
-                                <button class="win-btn w-4 h-4 flex items-center justify-center text-black font-bold font-mono">X</button>
+                                <button class="win-btn w-4 h-4 flex items-center justify-center">
+                                    <svg width="6" height="2" viewBox="0 0 6 2" fill="none" xmlns="http://www.w3.org/2000/svg" class="align-middle">
+                                        <rect width="6" height="2" fill="black"/>
+                                    </svg>
+                                </button>
+                                <button class="win-btn w-4 h-4 flex items-center justify-center">
+                                    <svg width="6" height="6" viewBox="0 0 6 6" fill="none" xmlns="http://www.w3.org/2000/svg" class="align-middle">
+                                        <path d="M0.5 0.5L5.5 5.5M5.5 0.5L0.5 5.5" stroke="black" stroke-width="1.5"/>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
-                        <div class="p-3 flex-1 flex flex-col overflow-y-auto bg-[#dfdfdf]">
+                        <div class="p-3 flex-1 flex flex-col overflow-y-auto bg-[#c0c0c0]">
                             
-                            <div class="win-inset p-2 bg-[#ffffcc] mb-3 font-mono text-[11px]">
+                            <div class="win-inset p-2 bg-[#ffff00] mb-3 font-mono text-[11px]">
                                 <div class="font-bold text-[#000080] border-b border-dashed border-[#000080] mb-1 pb-1 flex justify-between">
                                     <span>データ信頼性 (誤差マージン)</span>
                                     <i class="ph ph-info"></i>
                                 </div>
-                                <div id="moeResult" class="text-slate-800">
+                                <div id="moeResult" class="text-black">
                                     計算に必要なデータが不足しています。
                                 </div>
                             </div>
 
                             <fieldset class="win-groupbox flex-1 flex flex-col mt-0">
                                 <legend>議案別 賛成率比較</legend>
-                                <div class="mt-1 space-y-3 font-mono text-[11px] flex-1" id="agendaCompareChart">
-                                    <div class="text-slate-500 text-center pt-4">データ待機中...</div>
+                                <div class="mt-1 space-y-3 font-mono text-[11px] flex-1 text-black" id="agendaCompareChart">
+                                    <div class="text-[#808080] text-center pt-4">データ待機中...</div>
                                 </div>
                             </fieldset>
 
@@ -453,9 +505,9 @@
             const text = document.getElementById('dbStatusText');
             text.textContent = status;
             if (isOnline) {
-                ind.className = 'inline-block w-3 h-3 rounded-full bg-green-500 animate-pulse';
+                ind.className = 'inline-block w-3 h-3 rounded-full bg-[#00ff00] animate-pulse';
             } else {
-                ind.className = 'inline-block w-3 h-3 rounded-full bg-red-500';
+                ind.className = 'inline-block w-3 h-3 rounded-full bg-[#ff0000]';
             }
         };
 
@@ -552,16 +604,16 @@
             let moeHtml = '';
             
             if (moe === null) {
-                moeHtml = '<span class="text-slate-500">全校生徒数と現在の投票完了者数から誤差を計算します。左パネルで「全校生徒数」を設定してください。</span>';
+                moeHtml = '<span class="text-[#808080]">全校生徒数と現在の投票完了者数から誤差を計算します。左パネルで「全校生徒数」を設定してください。</span>';
             } else if (moe == 0 || (totalClasses > 0 && completedClasses >= totalClasses)) {
                 moeHtml = '<div class="text-[#008000] font-bold text-sm text-center py-1">全数集計完了<br>誤差: ±0.0%</div>';
             } else {
                 moeHtml = `
-                    現在の集計結果には、約 <strong class="text-lg text-rose-700">±${moe}%</strong> の統計的誤差（95%信頼水準）が含まれる可能性があります。
+                    現在の集計結果には、約 <strong class="text-lg text-[#ff0000]">±${moe}%</strong> の統計的誤差（95%信頼水準）が含まれる可能性があります。
                     <div class="w-full h-3 win-progress-track mt-1.5 mb-1">
                         <div class="win-chunk-gray h-full" style="width: ${Math.min(100, moe * 5)}%"></div>
                     </div>
-                    <div class="text-[9px] text-slate-500 text-right">※値が小さいほど全体意思を反映</div>
+                    <div class="text-[9px] text-[#808080] text-right">※値が小さいほど全体意思を反映</div>
                 `;
             }
             document.getElementById('moeResult').innerHTML = moeHtml;
@@ -582,7 +634,7 @@
                 `;
             }
             if (completedClasses === 0) {
-                compareHtml = '<div class="text-slate-500 text-center pt-4">報告済みのデータがありません。</div>';
+                compareHtml = '<div class="text-[#808080] text-center pt-4">報告済みのデータがありません。</div>';
             }
             document.getElementById('agendaCompareChart').innerHTML = compareHtml;
         };
@@ -595,7 +647,7 @@
             let totalEnrollment = 0;
             let totalAttended = 0;
             let completedClassesCount = 0;
-            let totalAttendedForVoting = 0; 
+            let totalAttendedForVoting = 0;
 
             const agendaTotals = {
                 1: { yes: 0, no: 0, totalAttendedForVoting: 0 },
@@ -610,7 +662,7 @@
             const viewMode = document.querySelector('input[name="viewMode"]:checked').value;
 
             if (sortedDocs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-500 bg-slate-50">報告済みのデータがありません。</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-[#808080] bg-[#ffffff]">報告済みのデータがありません。</td></tr>`;
                 updateSystemSummary(targetTotalClasses, 0, 0, 0, 0);
                 renderAgendas(agendaTotals, viewMode, targetTotalStudents, targetTotalClasses, 0);
                 updateGlobalVotingStatus(targetTotalClasses, 0);
@@ -634,7 +686,7 @@
                 if (step === 2) {
                     completedClassesCount++;
                     totalAttendedForVoting += attended;
-                    badge = `<span class="bg-green-100 text-green-800 border border-green-300 text-[10px] px-1.5 py-0.5 font-bold">完了</span>`;
+                    badge = `<span class="bg-[#ffffff] text-[#008000] border border-[#008000] text-[10px] px-1.5 py-0.5 font-bold">完了</span>`;
                     
                     for (let i = 1; i <= 4; i++) {
                         const yesVal = doc[`agenda${i}`]?.yes || 0;
@@ -644,25 +696,25 @@
                         agendaTotals[i].totalAttendedForVoting += attended;
                     }
                 } else {
-                    badge = `<span class="bg-blue-100 text-blue-800 border border-blue-300 text-[10px] px-1.5 py-0.5 font-bold">入力中</span>`;
+                    badge = `<span class="bg-[#ffffff] text-[#000080] border border-[#000080] text-[10px] px-1.5 py-0.5 font-bold">入力中</span>`;
                 }
 
                 const agStr = (agendaObj) => {
-                    if (!agendaObj) return `<span class="text-slate-400">--</span>`;
-                    return `<span class="text-blue-700">${agendaObj.yes}</span>/<span class="text-rose-600">${agendaObj.no}</span>`;
+                    if (!agendaObj) return `<span class="text-[#808080]">--</span>`;
+                    return `<span class="text-[#0000ff]">${agendaObj.yes}</span>/<span class="text-[#ff0000]">${agendaObj.no}</span>`;
                 };
 
                 tableHtml += `
-                    <tr class="hover:bg-slate-50 border-b border-slate-300">
-                        <td class="p-2 border-r border-slate-300 text-center">${badge}</td>
-                        <td class="p-2 border-r border-slate-300 font-bold text-slate-900">${className}</td>
-                        <td class="p-2 border-r border-slate-300 text-right">${total}</td>
-                        <td class="p-2 border-r border-slate-300 text-right text-green-700 font-bold">${attended}</td>
-                        <td class="p-2 border-r border-slate-300 text-right text-rose-600">${absent}</td>
-                        <td class="p-2 border-r border-slate-300 text-center">${step === 2 ? agStr(doc.agenda1) : '--'}</td>
-                        <td class="p-2 border-r border-slate-300 text-center">${step === 2 ? agStr(doc.agenda2) : '--'}</td>
-                        <td class="p-2 border-r border-slate-300 text-center">${step === 2 ? agStr(doc.agenda3) : '--'}</td>
-                        <td class="p-2 border-r border-slate-300 text-center">${step === 2 ? agStr(doc.agenda4) : '--'}</td>
+                    <tr class="hover:bg-[#c0c0c0] border-b border-[#808080]">
+                        <td class="p-2 border-r border-[#808080] text-center">${badge}</td>
+                        <td class="p-2 border-r border-[#808080] font-bold text-black">${className}</td>
+                        <td class="p-2 border-r border-[#808080] text-right text-black">${total}</td>
+                        <td class="p-2 border-r border-[#808080] text-right text-[#008000] font-bold">${attended}</td>
+                        <td class="p-2 border-r border-[#808080] text-right text-[#ff0000]">${absent}</td>
+                        <td class="p-2 border-r border-[#808080] text-center">${step === 2 ? agStr(doc.agenda1) : '--'}</td>
+                        <td class="p-2 border-r border-[#808080] text-center">${step === 2 ? agStr(doc.agenda2) : '--'}</td>
+                        <td class="p-2 border-r border-[#808080] text-center">${step === 2 ? agStr(doc.agenda3) : '--'}</td>
+                        <td class="p-2 border-r border-[#808080] text-center">${step === 2 ? agStr(doc.agenda4) : '--'}</td>
                     </tr>
                 `;
             });
@@ -718,30 +770,30 @@
                 const noRate = base > 0 ? (no / base) * 100 : 0;
                 const abstainRate = base > 0 ? (abstain / base) * 100 : 0;
 
-                let resultStatusHtml = `<span class="px-1.5 py-0.5 bg-[#dfdfdf] text-slate-600 border border-slate-500 shadow-[inset_1px_1px_0_#fff,inset_-1px_-1px_0_#808080] text-[10px]">審議中</span>`;
+                let resultStatusHtml = `<span class="px-1.5 py-0.5 bg-[#c0c0c0] text-[#808080] border border-[#808080] shadow-[inset_1px_1px_0_#ffffff,inset_-1px_-1px_0_#808080] text-[10px]">審議中</span>`;
                 
                 if (base > 0) {
                     if (yesRate > 50) {
-                        resultStatusHtml = `<span class="px-1.5 py-0.5 bg-[#000080] text-white border border-[#000040] shadow-[inset_1px_1px_0_#4040ff,inset_-1px_-1px_0_#000040] text-[10px] font-bold">可決${isAllCompleted ? '' : '(見込)'}</span>`;
+                        resultStatusHtml = `<span class="px-1.5 py-0.5 bg-[#000080] text-[#ffffff] border border-[#000000] shadow-[inset_1px_1px_0_#0000ff,inset_-1px_-1px_0_#000000] text-[10px] font-bold">可決${isAllCompleted ? '' : '(見込)'}</span>`;
                     } else if (noRate > 50) {
-                        resultStatusHtml = `<span class="px-1.5 py-0.5 bg-[#800000] text-white border border-[#400000] shadow-[inset_1px_1px_0_#ff4040,inset_-1px_-1px_0_#400000] text-[10px] font-bold">否決${isAllCompleted ? '' : '(見込)'}</span>`;
+                        resultStatusHtml = `<span class="px-1.5 py-0.5 bg-[#800000] text-[#ffffff] border border-[#000000] shadow-[inset_1px_1px_0_#ff0000,inset_-1px_-1px_0_#000000] text-[10px] font-bold">否決${isAllCompleted ? '' : '(見込)'}</span>`;
                     }
                 }
 
                 html += `
-                    <div class="win-inset p-2.5 bg-[#ece9d8] flex flex-col shadow-sm min-h-[120px]">
-                        <div class="flex flex-wrap items-center justify-between font-bold border-b border-slate-300 pb-1 mb-2 gap-1">
+                    <div class="win-inset p-2.5 bg-[#c0c0c0] flex flex-col shadow-sm min-h-[120px]">
+                        <div class="flex flex-wrap items-center justify-between font-bold border-b border-[#808080] pb-1 mb-2 gap-1">
                             <div class="flex items-center gap-2">
-                                <span class="text-[#000080]">第 ${i} 号議案 <span class="text-[10px] text-slate-500 font-normal inline-block">${viewTitle}</span></span>
+                                <span class="text-[#000080]">第 ${i} 号議案 <span class="text-[10px] text-[#808080] font-normal inline-block">${viewTitle}</span></span>
                                 ${resultStatusHtml}
                             </div>
-                            <span class="text-[11px] text-slate-600 font-mono whitespace-nowrap">分母: ${base} 人</span>
+                            <span class="text-[11px] text-[#808080] font-mono whitespace-nowrap">分母: ${base} 人</span>
                         </div>
                         
                         <div class="grid grid-cols-3 gap-1 text-[11px] font-mono mb-2 flex-1">
                             <div class="text-[#000080]">賛成: <b>${yes}</b><br>(<span class="${yesRate >= 50 ? 'font-bold bg-[#ffff00] px-0.5' : ''}">${yesRate.toFixed(1)}%</span>)</div>
                             <div class="text-[#800000]">反対: <b>${no}</b><br>(${noRate.toFixed(1)}%)</div>
-                            <div class="text-[#606060]">棄権: <b>${abstain}</b><br>(${abstainRate.toFixed(1)}%)</div>
+                            <div class="text-[#808080]">棄権: <b>${abstain}</b><br>(${abstainRate.toFixed(1)}%)</div>
                         </div>
 
                         <div class="w-full h-5 win-progress-track flex mt-auto">
