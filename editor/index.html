@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生徒会管理コンソール - データエディタ [Version 0.1]</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        body {
+            font-family: Tahoma, 'MS UI Gothic', 'MS P Gothic', sans-serif;
+            -webkit-font-smoothing: none;
+            background-color: #008080;
+            image-rendering: pixelated;
+            font-size: 12px;
+        }
+        
+        .win-outset {
+            background: #c0c0c0;
+            border-top: 2px solid #ffffff;
+            border-left: 2px solid #ffffff;
+            border-right: 2px solid #808080;
+            border-bottom: 2px solid #808080;
+            box-shadow: 1px 1px 0px 0px #000000;
+        }
+
+        .win-inset {
+            background: #ffffff;
+            border-top: 2px solid #808080;
+            border-left: 2px solid #808080;
+            border-right: 2px solid #ffffff;
+            border-bottom: 2px solid #ffffff;
+        }
+
+        .win-btn {
+            background: #c0c0c0;
+            border-top: 1.5px solid #ffffff;
+            border-left: 1.5px solid #ffffff;
+            border-right: 1.5px solid #808080;
+            border-bottom: 1.5px solid #808080;
+            box-shadow: 0.5px 0.5px 0px 0px #000000;
+        }
+        .win-btn:active:not(:disabled) {
+            border-top: 1.5px solid #808080;
+            border-left: 1.5px solid #808080;
+            border-right: 1.5px solid #ffffff;
+            border-bottom: 1.5px solid #ffffff;
+            padding-top: 2px;
+            padding-left: 2px;
+        }
+        .win-btn:disabled {
+            color: #808080;
+            text-shadow: 1px 1px 0px #ffffff;
+        }
+
+        .win-titlebar {
+            background: linear-gradient(90deg, 
+                #000080 0%, #000080 14%,
+                #08249b 14%, #08249b 28%,
+                #0d41b1 28%, #0d41b1 42%,
+                #115ac4 42%, #115ac4 57%,
+                #1571d4 57%, #1571d4 71%,
+                #1987e2 71%, #1987e2 85%,
+                #1d9cee 85%, #1d9cee 100%
+            );
+            color: #ffffff;
+            padding: 2px 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .win-groupbox {
+            border: 2px solid #ffffff;
+            border-top-color: #808080;
+            border-left-color: #808080;
+            padding: 8px 12px 12px 12px;
+            margin-top: 8px;
+            margin-bottom: 4px;
+        }
+        .win-groupbox legend {
+            padding: 0 4px;
+            font-size: 12px;
+            color: #000;
+        }
+
+        ::-webkit-scrollbar {
+            width: 16px;
+            height: 16px;
+            background: #dfdfdf;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c0c0c0;
+            border-top: 1.5px solid #ffffff;
+            border-left: 1.5px solid #ffffff;
+            border-right: 1.5px solid #808080;
+            border-bottom: 1.5px solid #808080;
+        }
+        ::-webkit-scrollbar-track {
+            background-image: radial-gradient(#c0c0c0 25%, transparent 25%), radial-gradient(#ffffff 25%, transparent 25%);
+            background-size: 4px 4px;
+            background-position: 0 0, 2px 2px;
+            background-color: #dfdfdf;
+        }
+
+        .list-item {
+            padding: 4px 8px;
+            cursor: default;
+            border-bottom: 1px dotted #ccc;
+            display: flex;
+            justify-content: space-between;
+        }
+        .list-item:hover {
+            background-color: #000080;
+            color: #ffffff;
+        }
+        .list-item.selected {
+            background-color: #000080;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body class="p-4 min-h-screen text-black overflow-x-hidden">
+
+    <div class="w-full max-w-[1000px] mx-auto space-y-4">
+        
+        <header class="win-outset flex items-center justify-between p-1.5 mb-2">
+            <div class="flex items-center gap-2">
+                <i class="ph-bold ph-database text-xl text-blue-900"></i>
+                <div class="font-bold">
+                    <span class="text-slate-700">生徒会管理コンソール -</span> 
+                    <span class="text-blue-900">投票データエディタ [Version 0.1]</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 text-slate-700 font-mono text-xs pr-2" id="systemClock">
+                2026-07-15 15:00:00 JST
+            </div>
+        </header>
+
+        <div id="statusAlert" class="win-outset p-2 hidden flex items-start gap-2 bg-[#ffffcc] border-l-4 border-yellow-600">
+            <i class="ph-fill ph-info text-yellow-700 text-lg"></i>
+            <div>
+                <span class="font-bold block">システムアナウンスメント:</span>
+                <span id="alertMessage">データベースに接続中...</span>
+            </div>
+        </div>
+
+        <div class="flex flex-row gap-4 h-[550px]">
+
+            <div class="w-[300px] flex-shrink-0 flex flex-col h-full win-outset">
+                <div class="win-titlebar flex items-center justify-between">
+                    <span class="flex items-center gap-1"><i class="ph ph-list"></i> 登録データ一覧</span>
+                </div>
+                <div class="p-1 bg-[#dfdfdf] border-b border-gray-400 flex justify-between items-center">
+                    <button id="btnNew" class="win-btn px-2 py-0.5 font-bold flex items-center gap-1 focus:outline-none">
+                        <i class="ph ph-plus"></i> 新規追加
+                    </button>
+                    <span class="text-[10px] text-gray-600 mr-1" id="listCount">0 件</span>
+                </div>
+                <div class="flex-1 bg-white overflow-y-auto" id="dataList">
+                    <div class="p-4 text-center text-gray-500">
+                        <i class="ph ph-spinner animate-spin"></i> 読込中...
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-1 flex flex-col h-full win-outset relative">
+                <div id="editorOverlay" class="absolute inset-0 bg-[#c0c0c0]/50 z-10 flex items-center justify-center backdrop-blur-[1px]">
+                    <div class="bg-[#dfdfdf] win-outset p-4 text-center">
+                        左のリストからデータを選択するか、<br>「新規追加」を押してください。
+                    </div>
+                </div>
+
+                <div class="win-titlebar flex items-center justify-between">
+                    <span class="flex items-center gap-1"><i class="ph ph-pencil"></i> データ編集プロパティ</span>
+                </div>
+                
+                <div class="flex-1 overflow-y-auto p-4 bg-[#c0c0c0]">
+                    <form id="editorForm" onsubmit="event.preventDefault();">
+                        
+                        <fieldset class="win-groupbox mt-0 bg-[#c0c0c0]">
+                            <legend>基本情報</legend>
+                            <table class="w-full text-sm">
+                                <tr>
+                                    <td class="p-1 w-24">クラス名:</td>
+                                    <td class="p-1"><input type="text" id="editClassName" class="win-inset w-full p-1 bg-white" required></td>
+                                </tr>
+                                <tr>
+                                    <td class="p-1">ステータス:</td>
+                                    <td class="p-1">
+                                        <select id="editStep" class="win-inset w-full p-1 bg-white">
+                                            <option value="1">入力中 (1)</option>
+                                            <option value="2">完了 (2)</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="p-1">在籍数:</td>
+                                    <td class="p-1"><input type="number" id="editTotal" class="win-inset w-32 p-1 bg-white text-right" min="0" required></td>
+                                </tr>
+                                <tr>
+                                    <td class="p-1">出席数:</td>
+                                    <td class="p-1"><input type="number" id="editAttended" class="win-inset w-32 p-1 bg-white text-right" min="0" required></td>
+                                </tr>
+                            </table>
+                        </fieldset>
+
+                        <fieldset class="win-groupbox bg-[#c0c0c0]">
+                            <legend>投票データ (完了ステータス時のみ有効)</legend>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="win-inset p-2 bg-[#ece9d8]">
+                                    <div class="font-bold text-[#000080] mb-2 border-b border-gray-300 pb-1">第1号議案</div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span>賛成票:</span>
+                                        <input type="number" id="editAg1Yes" class="win-inset w-16 p-0.5 bg-white text-right" min="0" value="0">
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span>反対票:</span>
+                                        <input type="number" id="editAg1No" class="win-inset w-16 p-0.5 bg-white text-right" min="0" value="0">
+                                    </div>
+                                </div>
+                                <div class="win-inset p-2 bg-[#ece9d8]">
+                                    <div class="font-bold text-[#000080] mb-2 border-b border-gray-300 pb-1">第2号議案</div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span>賛成票:</span>
+                                        <input type="number" id="editAg2Yes" class="win-inset w-16 p-0.5 bg-white text-right" min="0" value="0">
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span>反対票:</span>
+                                        <input type="number" id="editAg2No" class="win-inset w-16 p-0.5 bg-white text-right" min="0" value="0">
+                                    </div>
+                                </div>
+                                <div class="win-inset p-2 bg-[#ece9d8]">
+                                    <div class="font-bold text-[#000080] mb-2 border-b border-gray-300 pb-1">第3号議案</div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span>賛成票:</span>
+                                        <input type="number" id="editAg3Yes" class="win-inset w-16 p-0.5 bg-white text-right" min="0" value="0">
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span>反対票:</span>
+                                        <input type="number" id="editAg3No" class="win-inset w-16 p-0.5 bg-white text-right" min="0" value="0">
+                                    </div>
+                                </div>
+                                <div class="win-inset p-2 bg-[#ece9d8]">
+                                    <div class="font-bold text-[#000080] mb-2 border-b border-gray-300 pb-1">第4号議案</div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span>賛成票:</span>
+                                        <input type="number" id="editAg4Yes" class="win-inset w-16 p-0.5 bg-white text-right" min="0" value="0">
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span>反対票:</span>
+                                        <input type="number" id="editAg4No" class="win-inset w-16 p-0.5 bg-white text-right" min="0" value="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+                
+                <div class="p-2 bg-[#dfdfdf] border-t border-gray-400 flex justify-between items-center">
+                    <button id="btnDelete" class="win-btn px-4 py-1 text-red-700 font-bold focus:outline-none" disabled>
+                        <i class="ph ph-trash"></i> 削除
+                    </button>
+                    <button id="btnSave" class="win-btn px-6 py-1 font-bold focus:outline-none" disabled>
+                        <i class="ph ph-floppy-disk"></i> 保存
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="confirmDialog" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+        <div class="win-outset w-80 shadow-[2px_2px_10px_rgba(0,0,0,0.5)]">
+            <div class="win-titlebar flex justify-between items-center">
+                <span>警告 - データの削除</span>
+                <button class="win-btn w-4 h-4 flex items-center justify-center text-black font-bold font-mono" onclick="closeConfirmDialog()">X</button>
+            </div>
+            <div class="p-4 bg-[#c0c0c0] flex gap-4 items-start">
+                <i class="ph-fill ph-warning-circle text-4xl text-yellow-500 bg-black rounded-full leading-none"></i>
+                <div class="text-[13px] mt-1">
+                    選択したクラスのデータを完全に削除します。<br>
+                    この操作は元に戻せません。<br>
+                    本当によろしいですか？
+                </div>
+            </div>
+            <div class="p-2 bg-[#c0c0c0] border-t border-[#808080] flex justify-end gap-2">
+                <button id="confirmYes" class="win-btn px-4 py-1 focus:outline-none focus:ring-1 focus:ring-black">はい(Y)</button>
+                <button id="confirmNo" class="win-btn px-4 py-1 focus:outline-none focus:ring-1 focus:ring-black" onclick="closeConfirmDialog()">いいえ(N)</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        let db;
+        let auth;
+        let currentUser = null;
+        let currentDocsMap = {}; 
+        let selectedDocId = null;
+
+        const updateClock = () => {
+            const clockEl = document.getElementById('systemClock');
+            if (clockEl) {
+                const now = new Date();
+                const yyyy = now.getFullYear();
+                const mm = String(now.getMonth() + 1).padStart(2, '0');
+                const dd = String(now.getDate()).padStart(2, '0');
+                const hh = String(now.getHours()).padStart(2, '0');
+                const min = String(now.getMinutes()).padStart(2, '0');
+                const sec = String(now.getSeconds()).padStart(2, '0');
+                clockEl.textContent = `${yyyy}-${mm}-${dd} ${hh}:${min}:${sec} JST`;
+            }
+        };
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        const setAlert = (message, show = true, isSuccess = false) => {
+            const alertEl = document.getElementById('statusAlert');
+            const alertMsg = document.getElementById('alertMessage');
+            if (show) {
+                alertEl.classList.remove('hidden');
+                alertEl.className = `win-outset p-2 flex items-start gap-2 ${isSuccess ? 'bg-[#ccffcc] border-l-4 border-green-600' : 'bg-[#ffffcc] border-l-4 border-yellow-600'}`;
+                alertMsg.textContent = message;
+                
+                if(isSuccess) {
+                    setTimeout(() => {
+                        alertEl.classList.add('hidden');
+                    }, 3000);
+                }
+            } else {
+                alertEl.classList.add('hidden');
+            }
+        };
+
+        const initFirebase = async () => {
+            try {
+                const firebaseConfig = {
+                    apiKey: "AIzaSyCNbylYM-96elHEwq122riR48ZRc-mU_B8",
+                    authDomain: "v-s-system.firebaseapp.com",
+                    projectId: "v-s-system",
+                    storageBucket: "v-s-system.firebasestorage.app",
+                    messagingSenderId: "639176585909",
+                    appId: "1:639176585909:web:2abf53f9f0cc37fce244fc",
+                    measurementId: "G-NW7NVQ61Q7"
+                };
+
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                setAlert("認証試行中...", true);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    currentUser = user;
+                    if (user) {
+                        setAlert("オンライン/同期完了", true, true);
+                        startRealtimeSync();
+                    } else {
+                        setAlert("Firebase認証に失敗しました。再読み込みしてください。", true);
+                    }
+                });
+
+            } catch (error) {
+                console.error("Firebase Initialization Error:", error);
+                setAlert(`接続エラー: ${error.message}`, true);
+            }
+        };
+
+        const startRealtimeSync = () => {
+            if (!currentUser) return;
+
+            const votesCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'votes');
+
+            onSnapshot(votesCollectionRef, (snapshot) => {
+                const map = {};
+                snapshot.forEach((doc) => {
+                    map[doc.id] = { id: doc.id, ...doc.data() };
+                });
+                currentDocsMap = map;
+                renderList();
+            }, (error) => {
+                console.error("Firestore Listen Error:", error);
+                setAlert(`データ受信エラー: ${error.message}`, true);
+            });
+        };
+
+        const renderList = () => {
+            const listContainer = document.getElementById('dataList');
+            const docs = Object.values(currentDocsMap).sort((a, b) => (a.className || '').localeCompare(b.className || '', 'ja'));
+            
+            document.getElementById('listCount').textContent = `${docs.length} 件`;
+
+            if (docs.length === 0) {
+                listContainer.innerHTML = `<div class="p-4 text-center text-gray-500">データがありません。</div>`;
+                return;
+            }
+
+            let html = '';
+            docs.forEach(doc => {
+                const isSelected = selectedDocId === doc.id;
+                const statusStr = doc.step === 2 ? '[完了]' : '[入力中]';
+                html += `
+                    <div class="list-item ${isSelected ? 'selected' : ''}" data-id="${doc.id}">
+                        <span class="font-bold">${doc.className || '未設定'}</span>
+                        <span class="text-[10px] ${isSelected ? 'text-gray-300' : 'text-gray-500'}">${statusStr}</span>
+                    </div>
+                `;
+            });
+
+            listContainer.innerHTML = html;
+
+            document.querySelectorAll('.list-item').forEach(el => {
+                el.addEventListener('click', () => {
+                    selectDocument(el.getAttribute('data-id'));
+                });
+            });
+
+            if (selectedDocId && selectedDocId !== 'NEW' && !currentDocsMap[selectedDocId]) {
+                deselectDocument();
+            }
+        };
+
+        const deselectDocument = () => {
+            selectedDocId = null;
+            document.getElementById('editorOverlay').classList.remove('hidden');
+            document.getElementById('editorForm').reset();
+            document.getElementById('btnSave').disabled = true;
+            document.getElementById('btnDelete').disabled = true;
+            renderList();
+        };
+
+        const selectDocument = (id) => {
+            selectedDocId = id;
+            document.getElementById('editorOverlay').classList.add('hidden');
+            document.getElementById('btnSave').disabled = false;
+            
+            if (id === 'NEW') {
+                document.getElementById('editorForm').reset();
+                document.getElementById('editStep').value = "1";
+                document.getElementById('btnDelete').disabled = true;
+                
+                document.querySelectorAll('.list-item').forEach(el => el.classList.remove('selected'));
+            } else {
+                document.getElementById('btnDelete').disabled = false;
+                const data = currentDocsMap[id];
+                
+                document.getElementById('editClassName').value = data.className || '';
+                document.getElementById('editStep').value = data.step || 1;
+                document.getElementById('editTotal').value = data.totalStudents || 0;
+                document.getElementById('editAttended').value = data.attendedStudents || 0;
+
+                for (let i = 1; i <= 4; i++) {
+                    const agenda = data[`agenda${i}`] || { yes: 0, no: 0 };
+                    document.getElementById(`editAg${i}Yes`).value = agenda.yes;
+                    document.getElementById(`editAg${i}No`).value = agenda.no;
+                }
+                
+                renderList(); 
+            }
+        };
+
+        document.getElementById('btnNew').addEventListener('click', () => {
+            selectDocument('NEW');
+        });
+
+        // 保存ボタン（追加または更新）
+        document.getElementById('btnSave').addEventListener('click', async () => {
+            if (!currentUser || !selectedDocId) return;
+
+            const className = document.getElementById('editClassName').value.trim();
+            if(!className) {
+                setAlert("クラス名を入力してください。", true);
+                return;
+            }
+
+            const data = {
+                className: className,
+                step: parseInt(document.getElementById('editStep').value, 10),
+                totalStudents: parseInt(document.getElementById('editTotal').value, 10) || 0,
+                attendedStudents: parseInt(document.getElementById('editAttended').value, 10) || 0,
+                agenda1: {
+                    yes: parseInt(document.getElementById('editAg1Yes').value, 10) || 0,
+                    no: parseInt(document.getElementById('editAg1No').value, 10) || 0
+                },
+                agenda2: {
+                    yes: parseInt(document.getElementById('editAg2Yes').value, 10) || 0,
+                    no: parseInt(document.getElementById('editAg2No').value, 10) || 0
+                },
+                agenda3: {
+                    yes: parseInt(document.getElementById('editAg3Yes').value, 10) || 0,
+                    no: parseInt(document.getElementById('editAg3No').value, 10) || 0
+                },
+                agenda4: {
+                    yes: parseInt(document.getElementById('editAg4Yes').value, 10) || 0,
+                    no: parseInt(document.getElementById('editAg4No').value, 10) || 0
+                }
+            };
+
+            const btn = document.getElementById('btnSave');
+            btn.disabled = true;
+            btn.textContent = "保存中...";
+
+            try {
+                if (selectedDocId === 'NEW') {
+                    const votesCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'votes');
+                    const docRef = await addDoc(votesCollectionRef, data);
+                    setAlert(`${className} を新規追加しました。`, true, true);
+                    selectDocument(docRef.id);
+                } else {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'votes', selectedDocId);
+                    await updateDoc(docRef, data);
+                    setAlert(`${className} のデータを更新しました。`, true, true);
+                }
+            } catch (error) {
+                console.error("Save Error:", error);
+                setAlert(`保存エラー: ${error.message}`, true);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="ph ph-floppy-disk"></i> 保存`;
+            }
+        });
+
+        // 削除機能とモーダル制御
+        window.closeConfirmDialog = () => {
+            document.getElementById('confirmDialog').classList.add('hidden');
+        };
+
+        document.getElementById('btnDelete').addEventListener('click', () => {
+            if(!selectedDocId || selectedDocId === 'NEW') return;
+            document.getElementById('confirmDialog').classList.remove('hidden');
+        });
+
+        document.getElementById('confirmYes').addEventListener('click', async () => {
+            if (!currentUser || !selectedDocId || selectedDocId === 'NEW') return;
+            
+            const btn = document.getElementById('confirmYes');
+            btn.disabled = true;
+
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'votes', selectedDocId);
+                await deleteDoc(docRef);
+                setAlert(`データを削除しました。`, true, true);
+                deselectDocument();
+            } catch (error) {
+                console.error("Delete Error:", error);
+                setAlert(`削除エラー: ${error.message}`, true);
+            } finally {
+                btn.disabled = false;
+                closeConfirmDialog();
+            }
+        });
+
+        initFirebase();
+    </script>
+</body>
+</html>
