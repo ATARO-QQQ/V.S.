@@ -455,435 +455,438 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, query, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        let db;
-        let auth;
-        let currentUser = null;
-        let currentVoteDocs = []; 
-        let currentAgendas = [];
-        
-        // 追加: データのロード状態を管理するフラグ
-        let votesLoaded = false;
-        let agendasLoaded = false;
+        // HTML要素がブラウザに読み込まれてからスクリプトを実行するよう制御
+        window.addEventListener('DOMContentLoaded', () => {
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            let db;
+            let auth;
+            let currentUser = null;
+            let currentVoteDocs = []; 
+            let currentAgendas = [];
+            
+            let votesLoaded = false;
+            let agendasLoaded = false;
 
-        const loadSettings = () => {
-            const tc = localStorage.getItem('settingTotalClasses');
-            const ts = localStorage.getItem('settingTotalStudents');
-            if(tc) document.getElementById('inputTotalClasses').value = tc;
-            if(ts) document.getElementById('inputTotalStudents').value = ts;
-        };
-        const saveSettings = () => {
-            localStorage.setItem('settingTotalClasses', document.getElementById('inputTotalClasses').value);
-            localStorage.setItem('settingTotalStudents', document.getElementById('inputTotalStudents').value);
-        };
+            const loadSettings = () => {
+                const tc = localStorage.getItem('settingTotalClasses');
+                const ts = localStorage.getItem('settingTotalStudents');
+                if(tc) document.getElementById('inputTotalClasses').value = tc;
+                if(ts) document.getElementById('inputTotalStudents').value = ts;
+            };
 
-        // 修正: データが両方ロードされている場合のみ再描画を実行するように変更
-        document.getElementById('inputTotalClasses').addEventListener('input', () => {
-            saveSettings();
-            if (votesLoaded && agendasLoaded) processAndRenderData(currentVoteDocs, currentAgendas);
-        });
-        document.getElementById('inputTotalStudents').addEventListener('input', () => {
-            saveSettings();
-            if (votesLoaded && agendasLoaded) processAndRenderData(currentVoteDocs, currentAgendas);
-        });
-        document.querySelectorAll('input[name="viewMode"]').forEach(radio => {
-            radio.addEventListener('change', () => {
+            const saveSettings = () => {
+                localStorage.setItem('settingTotalClasses', document.getElementById('inputTotalClasses').value);
+                localStorage.setItem('settingTotalStudents', document.getElementById('inputTotalStudents').value);
+            };
+
+            // 手動入力の監視
+            document.getElementById('inputTotalClasses').addEventListener('input', () => {
+                saveSettings();
                 if (votesLoaded && agendasLoaded) processAndRenderData(currentVoteDocs, currentAgendas);
             });
-        });
 
-        loadSettings();
+            document.getElementById('inputTotalStudents').addEventListener('input', () => {
+                saveSettings();
+                if (votesLoaded && agendasLoaded) processAndRenderData(currentVoteDocs, currentAgendas);
+            });
 
-        const updateClock = () => {
-            const clockEl = document.getElementById('systemClock');
-            if (clockEl) {
-                const now = new Date();
-                const yyyy = now.getFullYear();
-                const mm = String(now.getMonth() + 1).padStart(2, '0');
-                const dd = String(now.getDate()).padStart(2, '0');
-                const hh = String(now.getHours()).padStart(2, '0');
-                const min = String(now.getMinutes()).padStart(2, '0');
-                const sec = String(now.getSeconds()).padStart(2, '0');
-                clockEl.textContent = `${yyyy}-${mm}-${dd} ${hh}:${min}:${sec} JST`;
-            }
-        };
-        setInterval(updateClock, 1000);
-        updateClock();
+            document.querySelectorAll('input[name="viewMode"]').forEach(radio => {
+                radio.addEventListener('change', () => {
+                    if (votesLoaded && agendasLoaded) processAndRenderData(currentVoteDocs, currentAgendas);
+                });
+            });
 
-        const setAlert = (message, show = true) => {
-            const alertEl = document.getElementById('statusAlert');
-            const alertMsg = document.getElementById('alertMessage');
-            if (show) {
-                alertEl.classList.remove('hidden');
-                alertMsg.textContent = message;
-            } else {
-                alertEl.classList.add('hidden');
-            }
-        };
+            loadSettings();
 
-        const updateConnectionIndicator = (status, isOnline = false) => {
-            const ind = document.getElementById('dbIndicator');
-            const text = document.getElementById('dbStatusText');
-            text.textContent = status;
-            if (isOnline) {
-                ind.className = 'inline-block w-3 h-3 rounded-full bg-[#00ff00] animate-pulse';
-            } else {
-                ind.className = 'inline-block w-3 h-3 rounded-full bg-[#ff0000]';
-            }
-        };
+            const updateClock = () => {
+                const clockEl = document.getElementById('systemClock');
+                if (clockEl) {
+                    const now = new Date();
+                    const yyyy = now.getFullYear();
+                    const mm = String(now.getMonth() + 1).padStart(2, '0');
+                    const dd = String(now.getDate()).padStart(2, '0');
+                    const hh = String(now.getHours()).padStart(2, '0');
+                    const min = String(now.getMinutes()).padStart(2, '0');
+                    const sec = String(now.getSeconds()).padStart(2, '0');
+                    clockEl.textContent = `${yyyy}-${mm}-${dd} ${hh}:${min}:${sec} JST`;
+                }
+            };
+            setInterval(updateClock, 1000);
+            updateClock();
 
-        const updateGlobalVotingStatus = (totalClasses, completedClasses) => {
-            const textEl = document.getElementById('globalVotingText');
-            const spinnerEl = document.getElementById('globalSpinner');
-            
-            if (totalClasses > 0 && completedClasses >= totalClasses) {
-                textEl.textContent = "全クラス集計完了";
-                textEl.className = "font-bold text-[#008000] text-[12px] font-mono";
-                spinnerEl.style.display = 'none';
-            } else {
-                textEl.textContent = "投票中...";
-                textEl.className = "font-bold text-[#000080] text-[12px] font-mono";
-                spinnerEl.style.display = 'grid';
-            }
-        };
-
-        const initFirebase = async () => {
-            try {
-                // ！！！ 注意 ！！！
-                // 以下の firebaseConfig の中身を、ご自身のFirebaseの設定コードに書き換えてください。
-                const firebaseConfig = {
-                    apiKey: "AIzaSyCNbylYM-96elHEwq122riR48ZRc-mU_B8",
-                    authDomain: "v-s-system.firebaseapp.com",
-                    projectId: "v-s-system",
-                    storageBucket: "v-s-system.firebasestorage.app",
-                    messagingSenderId: "639176585909",
-                    appId: "1:639176585909:web:2abf53f9f0cc37fce244fc",
-                    measurementId: "G-NW7NVQ61Q7"
-                };
-
-                const app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-
-                updateConnectionIndicator("認証試行中...", false);
-
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
+            const setAlert = (message, show = true) => {
+                const alertEl = document.getElementById('statusAlert');
+                const alertMsg = document.getElementById('alertMessage');
+                if (show) {
+                    alertEl.classList.remove('hidden');
+                    alertMsg.textContent = message;
                 } else {
-                    await signInAnonymously(auth);
+                    alertEl.classList.add('hidden');
+                }
+            };
+
+            const updateConnectionIndicator = (status, isOnline = false) => {
+                const ind = document.getElementById('dbIndicator');
+                const text = document.getElementById('dbStatusText');
+                if (text) text.textContent = status;
+                if (ind) {
+                    if (isOnline) {
+                        ind.className = 'inline-block w-3 h-3 rounded-full bg-[#00ff00] animate-pulse';
+                    } else {
+                        ind.className = 'inline-block w-3 h-3 rounded-full bg-[#ff0000]';
+                    }
+                }
+            };
+
+            const updateGlobalVotingStatus = (totalClasses, completedClasses) => {
+                const textEl = document.getElementById('globalVotingText');
+                const spinnerEl = document.getElementById('globalSpinner');
+                
+                if (totalClasses > 0 && completedClasses >= totalClasses) {
+                    textEl.textContent = "全クラス集計完了";
+                    textEl.className = "font-bold text-[#008000] text-[12px] font-mono";
+                    if (spinnerEl) spinnerEl.style.display = 'none';
+                } else {
+                    textEl.textContent = "投票中...";
+                    textEl.className = "font-bold text-[#000080] text-[12px] font-mono";
+                    if (spinnerEl) spinnerEl.style.display = 'grid';
+                }
+            };
+
+            const initFirebase = async () => {
+                try {
+                    // Firebase 設定
+                    const firebaseConfig = {
+                        apiKey: "AIzaSyCNbylYM-96elHEwq122riR48ZRc-mU_B8",
+                        authDomain: "v-s-system.firebaseapp.com",
+                        projectId: "v-s-system",
+                        storageBucket: "v-s-system.firebasestorage.app",
+                        messagingSenderId: "639176585909",
+                        appId: "1:639176585909:web:2abf53f9f0cc37fce244fc",
+                        measurementId: "G-NW7NVQ61Q7"
+                    };
+
+                    const app = initializeApp(firebaseConfig);
+                    auth = getAuth(app);
+                    db = getFirestore(app);
+
+                    updateConnectionIndicator("認証試行中...", false);
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+
+                    onAuthStateChanged(auth, (user) => {
+                        currentUser = user;
+                        if (user) {
+                            updateConnectionIndicator("オンライン/同期中", true);
+                            setAlert("", false);
+                            startRealtimeSync();
+                        } else {
+                            updateConnectionIndicator("未認証", false);
+                            setAlert("Firebase認証に失敗しました。再読み込みしてください。", true);
+                        }
+                    });
+
+                } catch (error) {
+                    console.error("Firebase Initialization Error:", error);
+                    updateConnectionIndicator("接続エラー", false);
+                    setAlert(`接続エラー: ${error.message}`, true);
+                }
+            };
+
+            const startRealtimeSync = () => {
+                if (!currentUser) return;
+
+                const votesCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'votes');
+                const agendasCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'agendas');
+
+                onSnapshot(votesCollectionRef, (snapshot) => {
+                    const voteDocs = [];
+                    snapshot.forEach((doc) => {
+                        voteDocs.push({ id: doc.id, ...doc.data() });
+                    });
+                    
+                    currentVoteDocs = voteDocs;
+                    votesLoaded = true;
+                    if (agendasLoaded) processAndRenderData(currentVoteDocs, currentAgendas);
+                }, (error) => {
+                    console.error("Firestore Listen Error (votes):", error);
+                    setAlert(`データ受信エラー: ${error.message}`, true);
+                });
+
+                onSnapshot(agendasCollectionRef, (snapshot) => {
+                    const agendas = [];
+                    snapshot.forEach((doc) => {
+                        agendas.push({ id: doc.id, ...doc.data() });
+                    });
+                    
+                    currentAgendas = agendas.sort((a, b) => (a.number || 0) - (b.number || 0));
+                    agendasLoaded = true;
+                    if (votesLoaded) processAndRenderData(currentVoteDocs, currentAgendas);
+                }, (error) => {
+                    console.error("Firestore Listen Error (agendas):", error);
+                    setAlert(`データ受信エラー: ${error.message}`, true);
+                });
+            };
+
+            const calculateMOE = (population, sampleSize) => {
+                if (!population || population <= 0 || sampleSize <= 0) return null;
+                if (sampleSize >= population) return 0;
+                
+                const z = 1.96;
+                const p = 0.5;
+                const popFactor = (population - sampleSize) / (population - 1);
+                const margin = z * Math.sqrt((p * (1 - p)) / sampleSize) * Math.sqrt(popFactor);
+                return (margin * 100).toFixed(1);
+            };
+
+            const updateAnalysisTools = (targetTotalStudents, totalAttendedForVoting, completedClasses, totalClasses, agendaTotals, agendas) => {
+                const moe = calculateMOE(targetTotalStudents, totalAttendedForVoting);
+                let moeHtml = '';
+                
+                if (moe === null) {
+                    moeHtml = '<span class="text-[#808080]">全校生徒数と現在の投票完了者数から誤差を計算します。左パネルで「全校生徒数」を設定してください。</span>';
+                } else if (moe == 0 || (totalClasses > 0 && completedClasses >= totalClasses)) {
+                    moeHtml = '<div class="text-[#008000] font-bold text-sm text-center py-1">全数集計完了<br>誤差: ±0.0%</div>';
+                } else {
+                    moeHtml = `
+                        現在の集計結果には、約 <strong class="text-lg text-[#ff0000]">±${moe}%</strong> の統計的誤差（95%信頼水準）が含まれる可能性があります。
+                        <div class="w-full h-3 win-progress-track mt-1.5 mb-1">
+                            <div class="win-chunk-gray h-full" style="width: ${Math.min(100, moe * 5)}%"></div>
+                        </div>
+                        <div class="text-[9px] text-[#808080] text-right">※値が小さいほど全体意思を反映</div>
+                    `;
+                }
+                document.getElementById('moeResult').innerHTML = moeHtml;
+
+                let compareHtml = '';
+                if (agendas.length === 0) {
+                    compareHtml = '<div class="text-[#808080] text-center pt-4">議題が設定されていません。</div>';
+                } else if (completedClasses === 0) {
+                    compareHtml = '<div class="text-[#808080] text-center pt-4">報告済みのデータがありません。</div>';
+                } else {
+                    agendas.forEach(ag => {
+                        const num = ag.number;
+                        const base = agendaTotals[num]?.totalAttendedForVoting || 0;
+                        const yesRate = base > 0 ? ((agendaTotals[num]?.yes || 0) / base) * 100 : 0;
+                        
+                        compareHtml += `
+                            <div class="flex items-center gap-2">
+                                <span class="w-10 font-bold">第${num}号</span>
+                                <div class="flex-1 h-3.5 win-progress-track">
+                                    <div class="win-chunk-blue h-full" style="width: ${yesRate}%"></div>
+                                </div>
+                                <span class="w-12 text-right font-bold text-[#000080]">${yesRate.toFixed(1)}%</span>
+                            </div>
+                        `;
+                    });
+                }
+                document.getElementById('agendaCompareChart').innerHTML = compareHtml;
+            };
+
+            const processAndRenderData = (docs, agendas) => {
+                const sortedDocs = [...docs].sort((a, b) => a.className.localeCompare(b.className, 'ja'));
+
+                document.getElementById('dataCount').textContent = `取得数: ${sortedDocs.length} クラス`;
+
+                let totalEnrollment = 0;
+                let totalAttended = 0;
+                let completedClassesCount = 0;
+                let totalAttendedForVoting = 0;
+
+                const agendaTotals = {};
+                agendas.forEach(ag => {
+                    agendaTotals[ag.number] = { yes: 0, no: 0, totalAttendedForVoting: 0, theme: ag.theme || '' };
+                });
+
+                // テーブルヘッダーの動的生成
+                const thead = document.getElementById('tableHeader');
+                let theadHtml = `
+                    <tr class="text-black font-bold border-b-2 border-[#808080] shadow-sm">
+                        <th class="p-1.5 border-r border-[#808080] text-center w-16">状態</th>
+                        <th class="p-1.5 border-r border-[#808080]">クラス名</th>
+                        <th class="p-1.5 border-r border-[#808080] text-right">在籍数</th>
+                        <th class="p-1.5 border-r border-[#808080] text-right">出席数</th>
+                        <th class="p-1.5 border-r border-[#808080] text-right">欠席数</th>
+                `;
+                agendas.forEach(ag => {
+                    theadHtml += `<th class="p-1.5 border-r border-[#808080] text-center">第${ag.number}号<br><span class="text-[10px] font-normal">(賛/反)</span></th>`;
+                });
+                theadHtml += `</tr>`;
+                thead.innerHTML = theadHtml;
+
+                const tbody = document.getElementById('rawDataTable');
+                const targetTotalClasses = parseInt(document.getElementById('inputTotalClasses').value, 10) || 0;
+                const targetTotalStudents = parseInt(document.getElementById('inputTotalStudents').value, 10) || 0;
+                const viewMode = document.querySelector('input[name="viewMode"]:checked').value;
+                const colspan = 5 + agendas.length;
+
+                if (sortedDocs.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="${colspan}" class="p-6 text-center text-[#808080] bg-[#ffffff]">報告済みのデータがありません。</td></tr>`;
+                    updateSystemSummary(targetTotalClasses, 0, 0, 0, 0);
+                    renderAgendas(agendaTotals, viewMode, targetTotalStudents, targetTotalClasses, 0, agendas);
+                    updateGlobalVotingStatus(targetTotalClasses, 0);
+                    updateAnalysisTools(targetTotalStudents, 0, 0, targetTotalClasses, agendaTotals, agendas);
+                    return;
                 }
 
-                onAuthStateChanged(auth, (user) => {
-                    currentUser = user;
-                    if (user) {
-                        updateConnectionIndicator("オンライン/同期中", true);
-                        setAlert("", false);
-                        startRealtimeSync();
+                let tableHtml = '';
+
+                sortedDocs.forEach(doc => {
+                    const step = doc.step || 1;
+                    const className = doc.className || '不明';
+                    const total = doc.totalStudents || 0;
+                    const attended = doc.attendedStudents || 0;
+                    const absent = Math.max(0, total - attended);
+
+                    totalEnrollment += total;
+                    totalAttended += attended;
+
+                    let badge = '';
+                    if (step === 2) {
+                        completedClassesCount++;
+                        totalAttendedForVoting += attended;
+                        badge = `<span class="bg-[#ffffff] text-[#008000] border border-[#008000] text-[10px] px-1.5 py-0.5 font-bold">完了</span>`;
+                        
+                        agendas.forEach(ag => {
+                            const num = ag.number;
+                            const yesVal = doc[`agenda${num}`]?.yes || 0;
+                            const noVal = doc[`agenda${num}`]?.no || 0;
+                            if(agendaTotals[num]) {
+                                agendaTotals[num].yes += yesVal;
+                                agendaTotals[num].no += noVal;
+                                agendaTotals[num].totalAttendedForVoting += attended;
+                            }
+                        });
                     } else {
-                        updateConnectionIndicator("未認証", false);
-                        setAlert("Firebase認証に失敗しました。再読み込みしてください。", true);
+                        badge = `<span class="bg-[#ffffff] text-[#000080] border border-[#000080] text-[10px] px-1.5 py-0.5 font-bold">入力中</span>`;
                     }
+
+                    const agStr = (agendaObj) => {
+                        if (!agendaObj) return `<span class="text-[#808080]">--</span>`;
+                        return `<span class="text-[#0000ff]">${agendaObj.yes}</span>/<span class="text-[#ff0000]">${agendaObj.no}</span>`;
+                    };
+
+                    let agendaColsHtml = '';
+                    agendas.forEach(ag => {
+                        agendaColsHtml += `<td class="p-2 border-r border-[#808080] text-center">${step === 2 ? agStr(doc[`agenda${ag.number}`]) : '--'}</td>`;
+                    });
+
+                    tableHtml += `
+                        <tr class="hover:bg-[#c0c0c0] border-b border-[#808080]">
+                            <td class="p-2 border-r border-[#808080] text-center">${badge}</td>
+                            <td class="p-2 border-r border-[#808080] font-bold text-black">${className}</td>
+                            <td class="p-2 border-r border-[#808080] text-right text-black">${total}</td>
+                            <td class="p-2 border-r border-[#808080] text-right text-[#008000] font-bold">${attended}</td>
+                            <td class="p-2 border-r border-[#808080] text-right text-[#ff0000]">${absent}</td>
+                            ${agendaColsHtml}
+                        </tr>
+                    `;
                 });
 
-            } catch (error) {
-                console.error("Firebase Initialization Error:", error);
-                updateConnectionIndicator("接続エラー", false);
-                setAlert(`接続エラー: ${error.message}`, true);
-            }
-        };
+                tbody.innerHTML = tableHtml;
 
-        const startRealtimeSync = () => {
-            if (!currentUser) return;
+                updateSystemSummary(targetTotalClasses, completedClassesCount, totalEnrollment, totalAttended, Math.max(0, totalEnrollment - totalAttended));
+                updateGlobalVotingStatus(targetTotalClasses, completedClassesCount);
+                renderAgendas(agendaTotals, viewMode, targetTotalStudents, targetTotalClasses, completedClassesCount, agendas);
+                updateAnalysisTools(targetTotalStudents, totalAttendedForVoting, completedClassesCount, targetTotalClasses, agendaTotals, agendas);
+            };
 
-            const votesCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'votes');
-            const agendasCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'agendas');
-
-            // 修正: フラグの初期化を削除（グローバルで管理するため）
-
-            onSnapshot(votesCollectionRef, (snapshot) => {
-                const voteDocs = [];
-                snapshot.forEach((doc) => {
-                    voteDocs.push({ id: doc.id, ...doc.data() });
-                });
+            const updateSystemSummary = (totalClasses, completed, enrollment, attended, absent) => {
+                const displayTotalClasses = totalClasses > 0 ? totalClasses : completed;
+                document.getElementById('totalClasses').textContent = `${completed} / ${displayTotalClasses}`;
                 
-                currentVoteDocs = voteDocs;
-                votesLoaded = true;
-                if (agendasLoaded) processAndRenderData(currentVoteDocs, currentAgendas);
-            }, (error) => {
-                console.error("Firestore Listen Error (votes):", error);
-                setAlert(`データ受信エラー: ${error.message}`, true);
-            });
+                const rate = displayTotalClasses > 0 ? (completed / displayTotalClasses) * 100 : 0;
+                const cappedRate = Math.min(100, rate);
+                document.getElementById('completionBar').style.width = `${cappedRate}%`;
+                document.getElementById('classRateText').textContent = `${cappedRate.toFixed(1)}%`;
 
-            onSnapshot(agendasCollectionRef, (snapshot) => {
-                const agendas = [];
-                snapshot.forEach((doc) => {
-                    agendas.push({ id: doc.id, ...doc.data() });
-                });
-                
-                currentAgendas = agendas.sort((a, b) => (a.number || 0) - (b.number || 0));
-                agendasLoaded = true;
-                if (votesLoaded) processAndRenderData(currentVoteDocs, currentAgendas);
-            }, (error) => {
-                console.error("Firestore Listen Error (agendas):", error);
-                setAlert(`データ受信エラー: ${error.message}`, true);
-            });
-        };
+                document.getElementById('statTotal').textContent = enrollment;
+                document.getElementById('statAttended').textContent = attended;
+                document.getElementById('statAbsent').textContent = absent;
 
-        const calculateMOE = (population, sampleSize) => {
-            if (!population || population <= 0 || sampleSize <= 0) return null;
-            if (sampleSize >= population) return 0;
-            
-            // 95%信頼区間, Z=1.96, p=0.5で最大誤差を計算
-            const z = 1.96;
-            const p = 0.5;
-            const popFactor = (population - sampleSize) / (population - 1);
-            const margin = z * Math.sqrt((p * (1 - p)) / sampleSize) * Math.sqrt(popFactor);
-            return (margin * 100).toFixed(1);
-        };
+                const attRate = enrollment > 0 ? (attended / enrollment) * 100 : 0;
+                document.getElementById('statAttendanceRate').textContent = `${attRate.toFixed(2)}%`;
+            };
 
-        const updateAnalysisTools = (targetTotalStudents, totalAttendedForVoting, completedClasses, totalClasses, agendaTotals, agendas) => {
-            const moe = calculateMOE(targetTotalStudents, totalAttendedForVoting);
-            let moeHtml = '';
-            
-            if (moe === null) {
-                moeHtml = '<span class="text-[#808080]">全校生徒数と現在の投票完了者数から誤差を計算します。左パネルで「全校生徒数」を設定してください。</span>';
-            } else if (moe == 0 || (totalClasses > 0 && completedClasses >= totalClasses)) {
-                moeHtml = '<div class="text-[#008000] font-bold text-sm text-center py-1">全数集計完了<br>誤差: ±0.0%</div>';
-            } else {
-                moeHtml = `
-                    現在の集計結果には、約 <strong class="text-lg text-[#ff0000]">±${moe}%</strong> の統計的誤差（95%信頼水準）が含まれる可能性があります。
-                    <div class="w-full h-3 win-progress-track mt-1.5 mb-1">
-                        <div class="win-chunk-gray h-full" style="width: ${Math.min(100, moe * 5)}%"></div>
-                    </div>
-                    <div class="text-[9px] text-[#808080] text-right">※値が小さいほど全体意思を反映</div>
-                `;
-            }
-            document.getElementById('moeResult').innerHTML = moeHtml;
+            const renderAgendas = (agendaTotals, viewMode, targetTotalStudents, totalClasses, completedClasses, agendas) => {
+                const container = document.getElementById('agendasContainer');
+                if (agendas.length === 0) {
+                    container.innerHTML = `<div class="col-span-2 text-center text-[#808080] py-8">議題がまだ設定されていません。</div>`;
+                    return;
+                }
 
-            let compareHtml = '';
-            if (agendas.length === 0) {
-                compareHtml = '<div class="text-[#808080] text-center pt-4">議題が設定されていません。</div>';
-            } else if (completedClasses === 0) {
-                compareHtml = '<div class="text-[#808080] text-center pt-4">報告済みのデータがありません。</div>';
-            } else {
+                let html = '';
+                const isAllCompleted = (totalClasses > 0 && completedClasses >= totalClasses);
+
                 agendas.forEach(ag => {
                     const num = ag.number;
-                    const base = agendaTotals[num].totalAttendedForVoting;
-                    const yesRate = base > 0 ? (agendaTotals[num].yes / base) * 100 : 0;
+                    const theme = ag.theme || '';
+                    const yes = agendaTotals[num]?.yes || 0;
+                    const no = agendaTotals[num]?.no || 0;
                     
-                    compareHtml += `
-                        <div class="flex items-center gap-2">
-                            <span class="w-10 font-bold">第${num}号</span>
-                            <div class="flex-1 h-3.5 win-progress-track">
-                                <div class="win-chunk-blue h-full" style="width: ${yesRate}%"></div>
+                    let base = agendaTotals[num]?.totalAttendedForVoting || 0;
+                    let viewTitle = "（現在の出席者ベース）";
+
+                    if (viewMode === 'total') {
+                        base = targetTotalStudents;
+                        viewTitle = "（全校生徒ベース・未回答は棄権扱い）";
+                    }
+                    
+                    base = Math.max(base, yes + no);
+
+                    const abstain = Math.max(0, base - (yes + no));
+
+                    const yesRate = base > 0 ? (yes / base) * 100 : 0;
+                    const noRate = base > 0 ? (no / base) * 100 : 0;
+                    const abstainRate = base > 0 ? (abstain / base) * 100 : 0;
+
+                    let resultStatusHtml = `<span class="px-1.5 py-0.5 bg-[#c0c0c0] text-[#808080] border border-[#808080] shadow-[inset_1px_1px_0_#ffffff,inset_-1px_-1px_0_#808080] text-[10px] whitespace-nowrap">審議中</span>`;
+                    
+                    if (base > 0) {
+                        if (yesRate > 50) {
+                            resultStatusHtml = `<span class="px-1.5 py-0.5 bg-[#000080] text-[#ffffff] border border-[#000000] shadow-[inset_1px_1px_0_#0000ff,inset_-1px_-1px_0_#000000] text-[10px] font-bold whitespace-nowrap">可決${isAllCompleted ? '' : '(見込)'}</span>`;
+                        } else if (noRate > 50) {
+                            resultStatusHtml = `<span class="px-1.5 py-0.5 bg-[#800000] text-[#ffffff] border border-[#000000] shadow-[inset_1px_1px_0_#ff0000,inset_-1px_-1px_0_#000000] text-[10px] font-bold whitespace-nowrap">否決${isAllCompleted ? '' : '(見込)'}</span>`;
+                        }
+                    }
+
+                    html += `
+                        <div class="win-inset p-2 bg-[#c0c0c0] flex flex-col shadow-sm min-h-[120px]">
+                            <div class="flex flex-col border-b border-[#808080] pb-1 mb-2 gap-1">
+                                <div class="flex items-center justify-between font-bold">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[#000080]">第 ${num} 号議案 <span class="text-[10px] text-[#808080] font-normal inline-block">${viewTitle}</span></span>
+                                        ${resultStatusHtml}
+                                    </div>
+                                    <span class="text-[11px] text-[#808080] font-mono whitespace-nowrap">分母: ${base} 人</span>
+                                </div>
+                                <div class="text-[11px] font-normal text-black truncate w-full" title="${theme}">${theme ? `「${theme}」` : '（テーマ未設定）'}</div>
                             </div>
-                            <span class="w-12 text-right font-bold text-[#000080]">${yesRate.toFixed(1)}%</span>
+                            
+                            <div class="grid grid-cols-3 gap-1 text-[11px] font-mono mb-2 flex-1">
+                                <div class="text-[#000080]">賛成: <b>${yes}</b><br>(<span class="${yesRate >= 50 ? 'font-bold bg-[#ffff00] px-0.5' : ''}">${yesRate.toFixed(1)}%</span>)</div>
+                                <div class="text-[#800000]">反対: <b>${no}</b><br>(${noRate.toFixed(1)}%)</div>
+                                <div class="text-[#808080]">棄権: <b>${abstain}</b><br>(${abstainRate.toFixed(1)}%)</div>
+                            </div>
+
+                            <div class="w-full h-5 win-progress-track flex mt-auto">
+                                <div class="win-chunk-blue h-full transition-all duration-300 border-r border-[#c0c0c0]" style="width: ${yesRate}%" title="賛成: ${yes}票"></div>
+                                <div class="win-chunk-red h-full transition-all duration-300 border-r border-[#c0c0c0]" style="width: ${noRate}%" title="反対: ${no}票"></div>
+                                <div class="win-chunk-gray h-full transition-all duration-300" style="width: ${abstainRate}%" title="棄権: ${abstain}票"></div>
+                            </div>
                         </div>
                     `;
                 });
-            }
-            document.getElementById('agendaCompareChart').innerHTML = compareHtml;
-        };
 
-        const processAndRenderData = (docs, agendas) => {
-            const sortedDocs = [...docs].sort((a, b) => a.className.localeCompare(b.className, 'ja'));
+                container.innerHTML = html;
+            };
 
-            document.getElementById('dataCount').textContent = `取得数: ${sortedDocs.length} クラス`;
-
-            let totalEnrollment = 0;
-            let totalAttended = 0;
-            let completedClassesCount = 0;
-            let totalAttendedForVoting = 0;
-
-            const agendaTotals = {};
-            agendas.forEach(ag => {
-                agendaTotals[ag.number] = { yes: 0, no: 0, totalAttendedForVoting: 0, theme: ag.theme || '' };
-            });
-
-            // テーブルヘッダーの動的生成
-            const thead = document.getElementById('tableHeader');
-            let theadHtml = `
-                <tr class="text-black font-bold border-b-2 border-[#808080] shadow-sm">
-                    <th class="p-1.5 border-r border-[#808080] text-center w-16">状態</th>
-                    <th class="p-1.5 border-r border-[#808080]">クラス名</th>
-                    <th class="p-1.5 border-r border-[#808080] text-right">在籍数</th>
-                    <th class="p-1.5 border-r border-[#808080] text-right">出席数</th>
-                    <th class="p-1.5 border-r border-[#808080] text-right">欠席数</th>
-            `;
-            agendas.forEach(ag => {
-                theadHtml += `<th class="p-1.5 border-r border-[#808080] text-center">第${ag.number}号<br><span class="text-[10px] font-normal">(賛/反)</span></th>`;
-            });
-            theadHtml += `</tr>`;
-            thead.innerHTML = theadHtml;
-
-            const tbody = document.getElementById('rawDataTable');
-            const targetTotalClasses = parseInt(document.getElementById('inputTotalClasses').value, 10) || 0;
-            const targetTotalStudents = parseInt(document.getElementById('inputTotalStudents').value, 10) || 0;
-            const viewMode = document.querySelector('input[name="viewMode"]:checked').value;
-            const colspan = 5 + agendas.length;
-
-            if (sortedDocs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="${colspan}" class="p-6 text-center text-[#808080] bg-[#ffffff]">報告済みのデータがありません。</td></tr>`;
-                updateSystemSummary(targetTotalClasses, 0, 0, 0, 0);
-                renderAgendas(agendaTotals, viewMode, targetTotalStudents, targetTotalClasses, 0, agendas);
-                updateGlobalVotingStatus(targetTotalClasses, 0);
-                updateAnalysisTools(targetTotalStudents, 0, 0, targetTotalClasses, agendaTotals, agendas);
-                return;
-            }
-
-            let tableHtml = '';
-
-            sortedDocs.forEach(doc => {
-                const step = doc.step || 1;
-                const className = doc.className || '不明';
-                const total = doc.totalStudents || 0;
-                const attended = doc.attendedStudents || 0;
-                const absent = Math.max(0, total - attended);
-
-                totalEnrollment += total;
-                totalAttended += attended;
-
-                let badge = '';
-                if (step === 2) {
-                    completedClassesCount++;
-                    totalAttendedForVoting += attended;
-                    badge = `<span class="bg-[#ffffff] text-[#008000] border border-[#008000] text-[10px] px-1.5 py-0.5 font-bold">完了</span>`;
-                    
-                    agendas.forEach(ag => {
-                        const num = ag.number;
-                        const yesVal = doc[`agenda${num}`]?.yes || 0;
-                        const noVal = doc[`agenda${num}`]?.no || 0;
-                        if(agendaTotals[num]) {
-                            agendaTotals[num].yes += yesVal;
-                            agendaTotals[num].no += noVal;
-                            agendaTotals[num].totalAttendedForVoting += attended;
-                        }
-                    });
-                } else {
-                    badge = `<span class="bg-[#ffffff] text-[#000080] border border-[#000080] text-[10px] px-1.5 py-0.5 font-bold">入力中</span>`;
-                }
-
-                const agStr = (agendaObj) => {
-                    if (!agendaObj) return `<span class="text-[#808080]">--</span>`;
-                    return `<span class="text-[#0000ff]">${agendaObj.yes}</span>/<span class="text-[#ff0000]">${agendaObj.no}</span>`;
-                };
-
-                let agendaColsHtml = '';
-                agendas.forEach(ag => {
-                    agendaColsHtml += `<td class="p-2 border-r border-[#808080] text-center">${step === 2 ? agStr(doc[`agenda${ag.number}`]) : '--'}</td>`;
-                });
-
-                tableHtml += `
-                    <tr class="hover:bg-[#c0c0c0] border-b border-[#808080]">
-                        <td class="p-2 border-r border-[#808080] text-center">${badge}</td>
-                        <td class="p-2 border-r border-[#808080] font-bold text-black">${className}</td>
-                        <td class="p-2 border-r border-[#808080] text-right text-black">${total}</td>
-                        <td class="p-2 border-r border-[#808080] text-right text-[#008000] font-bold">${attended}</td>
-                        <td class="p-2 border-r border-[#808080] text-right text-[#ff0000]">${absent}</td>
-                        ${agendaColsHtml}
-                    </tr>
-                `;
-            });
-
-            tbody.innerHTML = tableHtml;
-
-            updateSystemSummary(targetTotalClasses, completedClassesCount, totalEnrollment, totalAttended, Math.max(0, totalEnrollment - totalAttended));
-            updateGlobalVotingStatus(targetTotalClasses, completedClassesCount);
-            renderAgendas(agendaTotals, viewMode, targetTotalStudents, targetTotalClasses, completedClassesCount, agendas);
-            updateAnalysisTools(targetTotalStudents, totalAttendedForVoting, completedClassesCount, targetTotalClasses, agendaTotals, agendas);
-        };
-
-        const updateSystemSummary = (totalClasses, completed, enrollment, attended, absent) => {
-            const displayTotalClasses = totalClasses > 0 ? totalClasses : completed;
-            document.getElementById('totalClasses').textContent = `${completed} / ${displayTotalClasses}`;
-            
-            const rate = displayTotalClasses > 0 ? (completed / displayTotalClasses) * 100 : 0;
-            const cappedRate = Math.min(100, rate);
-            document.getElementById('completionBar').style.width = `${cappedRate}%`;
-            document.getElementById('classRateText').textContent = `${cappedRate.toFixed(1)}%`;
-
-            document.getElementById('statTotal').textContent = enrollment;
-            document.getElementById('statAttended').textContent = attended;
-            document.getElementById('statAbsent').textContent = absent;
-
-            const attRate = enrollment > 0 ? (attended / enrollment) * 100 : 0;
-            document.getElementById('statAttendanceRate').textContent = `${attRate.toFixed(2)}%`;
-        };
-
-        const renderAgendas = (agendaTotals, viewMode, targetTotalStudents, totalClasses, completedClasses, agendas) => {
-            const container = document.getElementById('agendasContainer');
-            if (agendas.length === 0) {
-                container.innerHTML = `<div class="col-span-2 text-center text-[#808080] py-8">議題がまだ設定されていません。</div>`;
-                return;
-            }
-
-            let html = '';
-            const isAllCompleted = (totalClasses > 0 && completedClasses >= totalClasses);
-
-            agendas.forEach(ag => {
-                const num = ag.number;
-                const theme = ag.theme || '';
-                const yes = agendaTotals[num].yes;
-                const no = agendaTotals[num].no;
-                
-                let base = agendaTotals[num].totalAttendedForVoting;
-                let viewTitle = "（現在の出席者ベース）";
-
-                if (viewMode === 'total') {
-                    base = targetTotalStudents;
-                    viewTitle = "（全校生徒ベース・未回答は棄権扱い）";
-                }
-                
-                base = Math.max(base, yes + no);
-
-                const abstain = Math.max(0, base - (yes + no));
-
-                const yesRate = base > 0 ? (yes / base) * 100 : 0;
-                const noRate = base > 0 ? (no / base) * 100 : 0;
-                const abstainRate = base > 0 ? (abstain / base) * 100 : 0;
-
-                let resultStatusHtml = `<span class="px-1.5 py-0.5 bg-[#c0c0c0] text-[#808080] border border-[#808080] shadow-[inset_1px_1px_0_#ffffff,inset_-1px_-1px_0_#808080] text-[10px] whitespace-nowrap">審議中</span>`;
-                
-                if (base > 0) {
-                    if (yesRate > 50) {
-                        resultStatusHtml = `<span class="px-1.5 py-0.5 bg-[#000080] text-[#ffffff] border border-[#000000] shadow-[inset_1px_1px_0_#0000ff,inset_-1px_-1px_0_#000000] text-[10px] font-bold whitespace-nowrap">可決${isAllCompleted ? '' : '(見込)'}</span>`;
-                    } else if (noRate > 50) {
-                        resultStatusHtml = `<span class="px-1.5 py-0.5 bg-[#800000] text-[#ffffff] border border-[#000000] shadow-[inset_1px_1px_0_#ff0000,inset_-1px_-1px_0_#000000] text-[10px] font-bold whitespace-nowrap">否決${isAllCompleted ? '' : '(見込)'}</span>`;
-                    }
-                }
-
-                html += `
-                    <div class="win-inset p-2 bg-[#c0c0c0] flex flex-col shadow-sm min-h-[120px]">
-                        <div class="flex flex-col border-b border-[#808080] pb-1 mb-2 gap-1">
-                            <div class="flex items-center justify-between font-bold">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-[#000080]">第 ${num} 号議案 <span class="text-[10px] text-[#808080] font-normal inline-block">${viewTitle}</span></span>
-                                    ${resultStatusHtml}
-                                </div>
-                                <span class="text-[11px] text-[#808080] font-mono whitespace-nowrap">分母: ${base} 人</span>
-                            </div>
-                            <div class="text-[11px] font-normal text-black truncate w-full" title="${theme}">${theme ? `「${theme}」` : '（テーマ未設定）'}</div>
-                        </div>
-                        
-                        <div class="grid grid-cols-3 gap-1 text-[11px] font-mono mb-2 flex-1">
-                            <div class="text-[#000080]">賛成: <b>${yes}</b><br>(<span class="${yesRate >= 50 ? 'font-bold bg-[#ffff00] px-0.5' : ''}">${yesRate.toFixed(1)}%</span>)</div>
-                            <div class="text-[#800000]">反対: <b>${no}</b><br>(${noRate.toFixed(1)}%)</div>
-                            <div class="text-[#808080]">棄権: <b>${abstain}</b><br>(${abstainRate.toFixed(1)}%)</div>
-                        </div>
-
-                        <div class="w-full h-5 win-progress-track flex mt-auto">
-                            <div class="win-chunk-blue h-full transition-all duration-300 border-r border-[#c0c0c0]" style="width: ${yesRate}%" title="賛成: ${yes}票"></div>
-                            <div class="win-chunk-red h-full transition-all duration-300 border-r border-[#c0c0c0]" style="width: ${noRate}%" title="反対: ${no}票"></div>
-                            <div class="win-chunk-gray h-full transition-all duration-300" style="width: ${abstainRate}%" title="棄権: ${abstain}票"></div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            container.innerHTML = html;
-        };
-
-        initFirebase();
+            initFirebase();
+        });
     </script>
 </body>
 </html>
