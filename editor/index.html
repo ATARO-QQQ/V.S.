@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>生徒会管理コンソール - データエディタ [Version 0.1]</title>
+    <title>生徒会管理コンソール - データエディタ [Version 0.11]</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -55,15 +55,8 @@
         }
 
         .win-titlebar {
-            background: linear-gradient(90deg, 
-                #000080 0%, #000080 14%,
-                #08249b 14%, #08249b 28%,
-                #0d41b1 28%, #0d41b1 42%,
-                #115ac4 42%, #115ac4 57%,
-                #1571d4 57%, #1571d4 71%,
-                #1987e2 71%, #1987e2 85%,
-                #1d9cee 85%, #1d9cee 100%
-            );
+            background-color: #000080;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" preserveAspectRatio="none"><defs><pattern id="p1" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="%23000080"/><rect x="0" y="0" width="1" height="1" fill="%230000ff"/><rect x="2" y="2" width="1" height="1" fill="%230000ff"/></pattern><pattern id="p2" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="%23000080"/><rect x="0" y="0" width="1" height="1" fill="%230000ff"/><rect x="2" y="2" width="1" height="1" fill="%230000ff"/><rect x="2" y="0" width="1" height="1" fill="%230000ff"/><rect x="0" y="2" width="1" height="1" fill="%230000ff"/></pattern><pattern id="p3" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="%23000080"/><rect x="0" y="0" width="1" height="1" fill="%230000ff"/><rect x="2" y="0" width="1" height="1" fill="%230000ff"/><rect x="0" y="2" width="1" height="1" fill="%230000ff"/><rect x="2" y="2" width="1" height="1" fill="%230000ff"/><rect x="1" y="1" width="1" height="1" fill="%230000ff"/><rect x="3" y="3" width="1" height="1" fill="%230000ff"/></pattern><pattern id="p4" width="2" height="2" patternUnits="userSpaceOnUse"><rect width="2" height="2" fill="%23000080"/><rect x="0" y="0" width="1" height="1" fill="%230000ff"/><rect x="1" y="1" width="1" height="1" fill="%230000ff"/></pattern><pattern id="p5" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="%230000ff"/><rect x="0" y="0" width="1" height="1" fill="%23000080"/><rect x="2" y="0" width="1" height="1" fill="%23000080"/><rect x="0" y="2" width="1" height="1" fill="%23000080"/><rect x="2" y="2" width="1" height="1" fill="%23000080"/><rect x="1" y="1" width="1" height="1" fill="%23000080"/><rect x="3" y="3" width="1" height="1" fill="%23000080"/></pattern><pattern id="p6" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="%230000ff"/><rect x="0" y="0" width="1" height="1" fill="%23000080"/><rect x="2" y="2" width="1" height="1" fill="%23000080"/><rect x="2" y="0" width="1" height="1" fill="%23000080"/><rect x="0" y="2" width="1" height="1" fill="%23000080"/></pattern><pattern id="p7" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="%230000ff"/><rect x="0" y="0" width="1" height="1" fill="%23000080"/><rect x="2" y="2" width="1" height="1" fill="%23000080"/></pattern></defs><rect x="0%" y="0" width="11.1%" height="100%" fill="%23000080"/><rect x="11.1%" y="0" width="11.1%" height="100%" fill="url(%23p1)"/><rect x="22.2%" y="0" width="11.1%" height="100%" fill="url(%23p2)"/><rect x="33.3%" y="0" width="11.1%" height="100%" fill="url(%23p3)"/><rect x="44.4%" y="0" width="11.2%" height="100%" fill="url(%23p4)"/><rect x="55.5%" y="0" width="11.1%" height="100%" fill="url(%23p5)"/><rect x="66.6%" y="0" width="11.1%" height="100%" fill="url(%23p6)"/><rect x="77.7%" y="0" width="11.1%" height="100%" fill="url(%23p7)"/><rect x="88.8%" y="0" width="11.2%" height="100%" fill="%230000ff"/></svg>');
             color: #ffffff;
             padding: 2px 4px;
             font-size: 12px;
@@ -81,13 +74,13 @@
         .win-groupbox legend {
             padding: 0 4px;
             font-size: 12px;
-            color: #000;
+            color: #000000;
         }
 
         ::-webkit-scrollbar {
             width: 16px;
             height: 16px;
-            background: #dfdfdf;
+            background: #c0c0c0;
         }
         ::-webkit-scrollbar-thumb {
             background: #c0c0c0;
@@ -97,16 +90,18 @@
             border-bottom: 1.5px solid #808080;
         }
         ::-webkit-scrollbar-track {
-            background-image: radial-gradient(#c0c0c0 25%, transparent 25%), radial-gradient(#ffffff 25%, transparent 25%);
-            background-size: 4px 4px;
-            background-position: 0 0, 2px 2px;
-            background-color: #dfdfdf;
+            background-color: #c0c0c0;
+            background-image: 
+                linear-gradient(45deg, #ffffff 25%, transparent 25%, transparent 75%, #ffffff 75%, #ffffff), 
+                linear-gradient(45deg, #ffffff 25%, transparent 25%, transparent 75%, #ffffff 75%, #ffffff);
+            background-size: 2px 2px;
+            background-position: 0 0, 1px 1px;
         }
 
         .list-item {
             padding: 4px 8px;
             cursor: default;
-            border-bottom: 1px dotted #ccc;
+            border-bottom: 1px dotted #808080;
             display: flex;
             justify-content: space-between;
         }
@@ -118,6 +113,38 @@
             background-color: #000080;
             color: #ffffff;
         }
+
+        .classic-radio {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #ffffff;
+            border-top: 2px solid #808080;
+            border-left: 2px solid #808080;
+            border-right: 2px solid #ffffff;
+            border-bottom: 2px solid #ffffff;
+            box-shadow: inset 1px 1px 0px #000000;
+            position: relative;
+            outline: none;
+            cursor: pointer;
+            flex-shrink: 0;
+            image-rendering: pixelated;
+        }
+        .classic-radio:checked::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 4px;
+            height: 4px;
+            background-color: #000000;
+        }
+
+        .dither-overlay {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="2" height="2"><rect width="1" height="1" fill="black"/><rect x="1" y="1" width="1" height="1" fill="black"/></svg>');
+            background-repeat: repeat;
+        }
     </style>
 </head>
 <body class="p-4 min-h-screen text-black overflow-x-hidden">
@@ -126,29 +153,29 @@
         
         <header class="win-outset flex items-center justify-between p-1.5 mb-2">
             <div class="flex items-center gap-2">
-                <i class="ph-bold ph-database text-xl text-blue-900"></i>
+                <i class="ph-bold ph-database text-xl text-[#000080]"></i>
                 <div class="font-bold">
-                    <span class="text-slate-700">生徒会管理コンソール -</span> 
-                    <span class="text-blue-900">投票データエディタ [Version 0.1]</span>
+                    <span class="text-black">生徒会管理コンソール -</span> 
+                    <span class="text-[#000080]">投票データエディタ [Version 0.11]</span>
                 </div>
             </div>
             <div class="flex items-center gap-4">
                 <div class="flex gap-2">
-                    <a href="https://ataro-qqq.github.io/V.S./viewer/" class="win-btn px-2 py-0.5 font-bold flex items-center gap-1 text-black hover:bg-[#e0e0e0] text-xs">
+                    <a href="https://ataro-qqq.github.io/V.S./viewer/" class="win-btn px-2 py-0.5 font-bold flex items-center gap-1 text-black hover:bg-[#ffffff] text-xs">
                         <i class="ph ph-chart-bar"></i> ビューアー
                     </a>
-                    <a href="https://ataro-qqq.github.io/V.S./editor/" class="win-inset px-2 py-0.5 font-bold flex items-center gap-1 text-gray-600 bg-[#dfdfdf] pointer-events-none select-none text-xs">
+                    <a href="https://ataro-qqq.github.io/V.S./editor/" class="win-inset px-2 py-0.5 font-bold flex items-center gap-1 text-[#808080] bg-[#c0c0c0] pointer-events-none select-none text-xs">
                         <i class="ph ph-pencil"></i> エディタ
                     </a>
                 </div>
-                <div class="flex items-center gap-2 text-slate-700 font-mono text-xs pr-2" id="systemClock">
+                <div class="flex items-center gap-2 text-black font-mono text-xs pr-2" id="systemClock">
                     2026-07-15 15:00:00 JST
                 </div>
             </div>
         </header>
 
-        <div id="statusAlert" class="win-outset p-2 hidden flex items-start gap-2 bg-[#ffffcc] border-l-4 border-yellow-600">
-            <i class="ph-fill ph-info text-yellow-700 text-lg"></i>
+        <div id="statusAlert" class="win-outset p-2 hidden flex items-start gap-2 bg-[#ffff00] border-l-4 border-[#808000]">
+            <i class="ph-fill ph-info text-[#808000] text-lg"></i>
             <div>
                 <span class="font-bold block">システムアナウンスメント:</span>
                 <span id="alertMessage">データベースに接続中...</span>
@@ -161,22 +188,22 @@
                 <div class="win-titlebar flex items-center justify-between">
                     <span class="flex items-center gap-1"><i class="ph ph-list"></i> 登録データ一覧</span>
                 </div>
-                <div class="p-1 bg-[#dfdfdf] border-b border-gray-400 flex justify-between items-center">
+                <div class="p-1 bg-[#c0c0c0] border-b border-[#808080] flex justify-between items-center">
                     <button id="btnNew" class="win-btn px-2 py-0.5 font-bold flex items-center gap-1 focus:outline-none">
                         <i class="ph ph-plus"></i> 新規追加
                     </button>
-                    <span class="text-[10px] text-gray-600 mr-1" id="listCount">0 件</span>
+                    <span class="text-[10px] text-[#808080] mr-1" id="listCount">0 件</span>
                 </div>
                 <div class="flex-1 bg-white overflow-y-auto" id="dataList">
-                    <div class="p-4 text-center text-gray-500">
+                    <div class="p-4 text-center text-[#808080]">
                         <i class="ph ph-spinner animate-spin"></i> 読込中...
                     </div>
                 </div>
             </div>
 
             <div class="flex-1 flex flex-col h-full win-outset relative">
-                <div id="editorOverlay" class="absolute inset-0 bg-[#c0c0c0]/50 z-10 flex items-center justify-center backdrop-blur-[1px]">
-                    <div class="bg-[#dfdfdf] win-outset p-4 text-center">
+                <div id="editorOverlay" class="absolute inset-0 dither-overlay z-10 flex items-center justify-center">
+                    <div class="bg-[#c0c0c0] win-outset p-4 text-center text-black">
                         左のリストからデータを選択するか、<br>「新規追加」を押してください。
                     </div>
                 </div>
@@ -218,8 +245,8 @@
                         <fieldset class="win-groupbox bg-[#c0c0c0]">
                             <legend>投票データ (完了ステータス時のみ有効)</legend>
                             <div class="grid grid-cols-2 gap-4">
-                                <div class="win-inset p-2 bg-[#ece9d8]">
-                                    <div class="font-bold text-[#000080] mb-2 border-b border-gray-300 pb-1">第1号議案</div>
+                                <div class="win-inset p-2 bg-[#c0c0c0]">
+                                    <div class="font-bold text-[#000080] mb-2 border-b border-[#808080] pb-1">第1号議案</div>
                                     <div class="flex items-center justify-between mb-1">
                                         <span>賛成票:</span>
                                         <input type="number" id="editAg1Yes" class="win-inset w-16 p-0.5 bg-white text-right" min="0" value="0">
@@ -229,8 +256,8 @@
                                         <input type="number" id="editAg1No" class="win-inset w-16 p-0.5 bg-white text-right" min="0" value="0">
                                     </div>
                                 </div>
-                                <div class="win-inset p-2 bg-[#ece9d8]">
-                                    <div class="font-bold text-[#000080] mb-2 border-b border-gray-300 pb-1">第2号議案</div>
+                                <div class="win-inset p-2 bg-[#c0c0c0]">
+                                    <div class="font-bold text-[#000080] mb-2 border-b border-[#808080] pb-1">第2号議案</div>
                                     <div class="flex items-center justify-between mb-1">
                                         <span>賛成票:</span>
                                         <input type="number" id="editAg2Yes" class="win-inset w-16 p-0.5 bg-white text-right" min="0" value="0">
@@ -240,8 +267,8 @@
                                         <input type="number" id="editAg2No" class="win-inset w-16 p-0.5 bg-white text-right" min="0" value="0">
                                     </div>
                                 </div>
-                                <div class="win-inset p-2 bg-[#ece9d8]">
-                                    <div class="font-bold text-[#000080] mb-2 border-b border-gray-300 pb-1">第3号議案</div>
+                                <div class="win-inset p-2 bg-[#c0c0c0]">
+                                    <div class="font-bold text-[#000080] mb-2 border-b border-[#808080] pb-1">第3号議案</div>
                                     <div class="flex items-center justify-between mb-1">
                                         <span>賛成票:</span>
                                         <input type="number" id="editAg3Yes" class="win-inset w-16 p-0.5 bg-white text-right" min="0" value="0">
@@ -251,8 +278,8 @@
                                         <input type="number" id="editAg3No" class="win-inset w-16 p-0.5 bg-white text-right" min="0" value="0">
                                     </div>
                                 </div>
-                                <div class="win-inset p-2 bg-[#ece9d8]">
-                                    <div class="font-bold text-[#000080] mb-2 border-b border-gray-300 pb-1">第4号議案</div>
+                                <div class="win-inset p-2 bg-[#c0c0c0]">
+                                    <div class="font-bold text-[#000080] mb-2 border-b border-[#808080] pb-1">第4号議案</div>
                                     <div class="flex items-center justify-between mb-1">
                                         <span>賛成票:</span>
                                         <input type="number" id="editAg4Yes" class="win-inset w-16 p-0.5 bg-white text-right" min="0" value="0">
@@ -267,8 +294,8 @@
                     </form>
                 </div>
                 
-                <div class="p-2 bg-[#dfdfdf] border-t border-gray-400 flex justify-between items-center">
-                    <button id="btnDelete" class="win-btn px-4 py-1 text-red-700 font-bold focus:outline-none" disabled>
+                <div class="p-2 bg-[#c0c0c0] border-t border-[#808080] flex justify-between items-center">
+                    <button id="btnDelete" class="win-btn px-4 py-1 text-[#ff0000] font-bold focus:outline-none" disabled>
                         <i class="ph ph-trash"></i> 削除
                     </button>
                     <button id="btnSave" class="win-btn px-6 py-1 font-bold focus:outline-none" disabled>
@@ -284,10 +311,14 @@
         <div class="win-outset w-80 shadow-[2px_2px_10px_rgba(0,0,0,0.5)]">
             <div class="win-titlebar flex justify-between items-center">
                 <span>警告 - データの削除</span>
-                <button class="win-btn w-4 h-4 flex items-center justify-center text-black font-bold font-mono" onclick="closeConfirmDialog()">X</button>
+                <button class="win-btn w-4 h-4 flex items-center justify-center" onclick="closeConfirmDialog()">
+                    <svg width="6" height="6" viewBox="0 0 6 6" fill="none" xmlns="http://www.w3.org/2000/svg" class="align-middle">
+                        <path d="M0.5 0.5L5.5 5.5M5.5 0.5L0.5 5.5" stroke="black" stroke-width="1.5"/>
+                    </svg>
+                </button>
             </div>
             <div class="p-4 bg-[#c0c0c0] flex gap-4 items-start">
-                <i class="ph-fill ph-warning-circle text-4xl text-yellow-500 bg-black rounded-full leading-none"></i>
+                <i class="ph-fill ph-warning-circle text-4xl text-[#ffff00] bg-black rounded-full leading-none"></i>
                 <div class="text-[13px] mt-1">
                     選択したクラスのデータを完全に削除します。<br>
                     この操作は元に戻せません。<br>
@@ -334,7 +365,7 @@
             const alertMsg = document.getElementById('alertMessage');
             if (show) {
                 alertEl.classList.remove('hidden');
-                alertEl.className = `win-outset p-2 flex items-start gap-2 ${isSuccess ? 'bg-[#ccffcc] border-l-4 border-green-600' : 'bg-[#ffffcc] border-l-4 border-yellow-600'}`;
+                alertEl.className = `win-outset p-2 flex items-start gap-2 ${isSuccess ? 'bg-[#00ff00] border-l-4 border-[#008000] text-black' : 'bg-[#ffff00] border-l-4 border-[#808000] text-black'}`;
                 alertMsg.textContent = message;
                 
                 if(isSuccess) {
@@ -412,7 +443,7 @@
             document.getElementById('listCount').textContent = `${docs.length} 件`;
 
             if (docs.length === 0) {
-                listContainer.innerHTML = `<div class="p-4 text-center text-gray-500">データがありません。</div>`;
+                listContainer.innerHTML = `<div class="p-4 text-center text-[#808080]">データがありません。</div>`;
                 return;
             }
 
@@ -423,7 +454,7 @@
                 html += `
                     <div class="list-item ${isSelected ? 'selected' : ''}" data-id="${doc.id}">
                         <span class="font-bold">${doc.className || '未設定'}</span>
-                        <span class="text-[10px] ${isSelected ? 'text-gray-300' : 'text-gray-500'}">${statusStr}</span>
+                        <span class="text-[10px] ${isSelected ? 'text-[#c0c0c0]' : 'text-[#808080]'}">${statusStr}</span>
                     </div>
                 `;
             });
@@ -484,7 +515,6 @@
             selectDocument('NEW');
         });
 
-        // 保存ボタン（追加または更新）
         document.getElementById('btnSave').addEventListener('click', async () => {
             if (!currentUser || !selectedDocId) return;
 
@@ -541,7 +571,6 @@
             }
         });
 
-        // 削除機能とモーダル制御
         window.closeConfirmDialog = () => {
             document.getElementById('confirmDialog').classList.add('hidden');
         };
