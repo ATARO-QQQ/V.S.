@@ -36,14 +36,12 @@
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 relative min-h-screen overflow-x-hidden">
-    
     <div class="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
         <div class="absolute inset-0" style="background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px; opacity: 0.6;"></div>
         <div class="absolute top-[-5%] left-[-10%] w-72 h-72 sm:w-96 sm:h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-pulse" style="animation-duration: 10s;"></div>
         <div class="absolute top-[20%] right-[-10%] w-80 h-80 sm:w-[400px] sm:h-[400px] bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-pulse" style="animation-duration: 12s; animation-delay: 2s;"></div>
         <div class="absolute bottom-[-10%] left-[20%] w-96 h-96 sm:w-[500px] sm:h-[500px] bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-pulse" style="animation-duration: 15s; animation-delay: 1s;"></div>
     </div>
-
     <div id="loginOverlay" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-md transition-opacity">
         <div class="glass-card p-8 sm:p-10 rounded-3xl shadow-2xl w-full max-w-md mx-4 transform transition-all">
             <div class="text-center mb-8">
@@ -71,9 +69,7 @@
             </button>
         </div>
     </div>
-
     <div id="mainContent" class="max-w-2xl mx-auto px-4 py-8 sm:py-12 relative z-10 hidden fade-enter">
-        
         <header class="text-center mb-8 relative">
             <div class="absolute right-0 top-0">
                 <button id="btnLogout" class="text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1 bg-white/50 px-3 py-1.5 rounded-full border border-slate-200 transition-colors">
@@ -85,9 +81,7 @@
                 <span id="displayLoginUser" class="font-bold text-blue-600"></span> としてログイン中
             </p>
         </header>
-
         <div id="messageArea" class="hidden p-4 mb-6 rounded-xl text-center font-bold transition-all shadow-sm"></div>
-
         <form id="classInfoForm" class="space-y-6 sm:space-y-8 mb-8">
             <section class="glass-card p-6 sm:p-8 rounded-3xl shadow-lg relative transition-all" id="classInfoSection">
                 <div class="flex items-center justify-between mb-6 border-b border-slate-200 pb-3">
@@ -97,7 +91,6 @@
                     </div>
                     <span id="classInfoStatus" class="hidden bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full font-bold border border-green-200 shadow-sm"><i class="ph-fill ph-check-circle mr-1"></i>送信済</span>
                 </div>
-                
                 <div class="space-y-5">
                     <div>
                         <label for="className" class="block text-sm sm:text-base font-bold text-slate-700 mb-2">クラス名 <span class="text-red-500 font-normal ml-1 text-xs">必須</span></label>
@@ -117,7 +110,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="mt-8" id="classInfoBtnContainer">
                     <button type="submit" id="submitClassInfoBtn" disabled
                         class="w-full py-4 px-6 bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center justify-center gap-2">
@@ -127,14 +119,12 @@
                 </div>
             </section>
         </form>
-
         <form id="voteResultForm" class="space-y-6 sm:space-y-8 hidden opacity-0 transition-opacity duration-500">
             <section class="glass-card p-6 sm:p-8 rounded-3xl shadow-lg space-y-8">
                 <div class="flex items-center gap-2 mb-2 border-b border-slate-200 pb-3">
                     <i class="ph-fill ph-ballot text-2xl text-teal-600"></i>
                     <h2 class="text-xl font-bold text-slate-800">ステップ 2：各議題の投票結果</h2>
                 </div>
-                
                 <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl flex items-start gap-3 shadow-inner">
                     <i class="ph-fill ph-info text-blue-600 text-xl mt-0.5"></i>
                     <p class="text-sm font-bold text-blue-800">
@@ -142,45 +132,37 @@
                         <span class="text-xs font-normal text-blue-600">賛成・反対の合計がこの人数を超えないように入力してください。</span>
                     </p>
                 </div>
-               
                 <div id="dynamicAgendasContainer" class="space-y-6">
                     <div class="text-center text-slate-500 py-8">
                         <i class="ph ph-spinner animate-spin text-2xl mb-2"></i><br>議題データを読み込み中...
                     </div>
                 </div>
             </section>
-
             <button type="submit" id="submitVoteBtn"
                 class="w-full py-4 px-6 bg-teal-600 hover:bg-teal-700 text-white text-lg font-bold rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all flex items-center justify-center gap-2">
                 <i class="ph ph-check-square-offset text-xl"></i>
                 <span>投票結果を最終送信する</span>
             </button>
-            
         </form>
     </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, updateDoc, doc, serverTimestamp, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
+        import { getFirestore, collection, addDoc, updateDoc, doc, serverTimestamp, onSnapshot, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         window.addEventListener('DOMContentLoaded', () => {
             const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
             let db;
             let auth;
             let currentUser = null;
-            
             let currentDocumentId = null;
             let currentAttendedCount = 0;
             let currentAgendas = [];
-
             const formatNumberInput = (element) => {
                 let val = element.value;
                 val = val.replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
                 val = val.replace(/[^0-9]/g, '');
                 element.value = val;
             };
-
             const attachNumberInputListeners = (container) => {
                 container.querySelectorAll('.number-input').forEach(input => {
                     input.addEventListener('input', (e) => formatNumberInput(e.target));
@@ -189,13 +171,10 @@
                     });
                 });
             };
-
             attachNumberInputListeners(document);
-
             const showMessage = (text, type) => {
                 const msgArea = document.getElementById('messageArea');
                 msgArea.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'border-red-300', 'bg-green-100', 'text-green-700', 'border-green-300');
-                
                 if (type === 'error') {
                     msgArea.classList.add('bg-red-100', 'text-red-700', 'border', 'border-red-300');
                     msgArea.innerHTML = `<i class="ph-fill ph-warning-circle text-xl align-bottom mr-1"></i> ${text}`;
@@ -205,7 +184,6 @@
                 }
                 msgArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
             };
-
             const setClassInfoButtonState = (isLoading) => {
                 const btn = document.getElementById('submitClassInfoBtn');
                 if (isLoading) {
@@ -220,7 +198,6 @@
                     }
                 }
             };
-
             const setVoteButtonState = (isLoading) => {
                 const btn = document.getElementById('submitVoteBtn');
                 if (isLoading) {
@@ -231,7 +208,6 @@
                     btn.innerHTML = `<i class="ph ph-check-square-offset text-xl"></i><span>投票結果を最終送信する</span>`;
                 }
             };
-
             const renderAgendaInputs = () => {
                 const container = document.getElementById('dynamicAgendasContainer');
                 if (currentAgendas.length === 0) {
@@ -239,14 +215,12 @@
                     setClassInfoButtonState(false);
                     return;
                 }
-
                 let html = '';
                 currentAgendas.forEach(ag => {
                     const num = ag.number;
                     const theme = ag.theme || '';
                     const themeHtml = theme ? `<p class="text-sm font-bold text-slate-500 mb-4 bg-white px-3 py-2 rounded-lg border border-slate-200">議題テーマ：${theme}</p>` : '';
                     const mbClass = theme ? 'mb-2' : 'mb-4';
-                    
                     html += `
                     <div class="bg-slate-50/50 p-5 rounded-2xl border border-slate-200 shadow-sm">
                         <h3 class="text-lg font-bold text-slate-800 ${mbClass}">第${num}号議案</h3>
@@ -267,11 +241,9 @@
                     `;
                 });
                 container.innerHTML = html;
-                
                 attachNumberInputListeners(container);
                 setClassInfoButtonState(false);
             };
-
             const initFirebase = async () => {
                 try {
                     const firebaseConfig = {
@@ -283,17 +255,14 @@
                         appId: "1:639176585909:web:2abf53f9f0cc37fce244fc",
                         measurementId: "G-NW7NVQ61Q7"
                     };
-
                     const app = initializeApp(firebaseConfig);
                     auth = getAuth(app);
                     db = getFirestore(app);
-
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                         await signInWithCustomToken(auth, __initial_auth_token);
                     } else {
                         await signInAnonymously(auth);
                     }
-
                     onAuthStateChanged(auth, (user) => {
                         currentUser = user;
                         if (user) {
@@ -302,17 +271,14 @@
                             document.getElementById('loginErrorMsg').textContent = "データベースへの接続に失敗しました。";
                         }
                     });
-
                 } catch (error) {
                     console.error("Firebase initialization error:", error);
                     document.getElementById('loginErrorMsg').textContent = "通信エラーが発生しました。";
                 }
             };
-
             const checkSessionLogin = () => {
                 const loggedInRole = sessionStorage.getItem('voteSys_role');
                 const loggedInUser = sessionStorage.getItem('voteSys_userId');
-                
                 if (loggedInRole === 'user' || loggedInRole === 'admin') {
                     showMainContent(loggedInUser);
                     loadAgendas();
@@ -321,40 +287,30 @@
                     document.getElementById('mainContent').classList.add('hidden');
                 }
             };
-
             document.getElementById('btnLoginSubmit').addEventListener('click', async () => {
                 const idInput = document.getElementById('loginUserId').value.trim();
                 const passInput = document.getElementById('loginPassword').value.trim();
                 const errorMsg = document.getElementById('loginErrorMsg');
                 const loadingMsg = document.getElementById('loadingMsg');
                 const btn = document.getElementById('btnLoginSubmit');
-
                 errorMsg.textContent = "";
-                
                 if (!idInput || !passInput) {
                     errorMsg.textContent = "ユーザーIDとパスワードを入力してください。";
                     return;
                 }
-
                 btn.disabled = true;
                 loadingMsg.classList.remove('hidden');
-
                 try {
                     const accountsRef = collection(db, 'artifacts', appId, 'public', 'data', 'accounts');
-                    const snapshot = await getDocs(accountsRef);
-                    
+                    const q = query(accountsRef, where("userId", "==", idInput));
+                    const snapshot = await getDocs(q);
                     let foundAccount = null;
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
-                        if (data.userId === idInput) {
-                            foundAccount = data;
-                        }
-                    });
-
-                    if (snapshot.empty && idInput === 'admin' && passInput === 'admin') {
+                    if (!snapshot.empty) {
+                        foundAccount = snapshot.docs[0].data();
+                    }
+                    if (!foundAccount && idInput === 'admin' && passInput === 'admin') {
                         foundAccount = { userId: 'admin', password: 'admin', role: 'admin' };
                     }
-
                     if (foundAccount && foundAccount.password === passInput) {
                         sessionStorage.setItem('voteSys_role', foundAccount.role);
                         sessionStorage.setItem('voteSys_userId', foundAccount.userId);
@@ -371,28 +327,22 @@
                     loadingMsg.classList.add('hidden');
                 }
             });
-
             document.getElementById('loginPassword').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') document.getElementById('btnLoginSubmit').click();
             });
-
             const showMainContent = (userId) => {
                 document.getElementById('loginOverlay').classList.add('hidden');
                 document.getElementById('mainContent').classList.remove('hidden');
                 document.getElementById('displayLoginUser').textContent = userId;
-                
                 document.getElementById('className').value = userId;
-                
                 document.getElementById('loginUserId').value = '';
                 document.getElementById('loginPassword').value = '';
             };
-
             document.getElementById('btnLogout').addEventListener('click', () => {
                 sessionStorage.removeItem('voteSys_role');
                 sessionStorage.removeItem('voteSys_userId');
                 window.location.reload();
             });
-
             const loadAgendas = () => {
                 if (!currentUser) return;
                 const agendasCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'agendas');
@@ -408,33 +358,26 @@
                     showMessage(`議題データの読み込みに失敗しました: ${error.message}`, "error");
                 });
             };
-
             document.getElementById('classInfoForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
-                
                 if (!currentUser) {
                     showMessage("認証されていません。再読み込みしてください。", "error");
                     return;
                 }
-
                 const className = document.getElementById('className').value.trim();
                 const totalStudentsStr = document.getElementById('totalStudents').value;
                 const attendedStudentsStr = document.getElementById('attendedStudents').value;
-
                 if (!totalStudentsStr || !attendedStudentsStr) {
                     showMessage("人数を入力してください。", "error");
                     return;
                 }
-
                 const totalStudents = parseInt(totalStudentsStr, 10);
                 const attendedStudents = parseInt(attendedStudentsStr, 10);
-                
                 if (attendedStudents > totalStudents) {
                     showMessage("「出席人数」が「在籍人数」を上回っています。数値を修正してください。", "error");
                     document.getElementById('attendedStudents').focus();
                     return;
                 }
-
                 const classData = {
                     className: className,
                     totalStudents: totalStudents,
@@ -443,24 +386,19 @@
                     submittedAt: serverTimestamp(),
                     submittedBy: sessionStorage.getItem('voteSys_userId') || currentUser.uid
                 };
-
                 setClassInfoButtonState(true);
                 document.getElementById('messageArea').classList.add('hidden');
-
                 try {
                     const votesCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'votes');
                     const docRef = await addDoc(votesCollectionRef, classData);
-                    
                     currentDocumentId = docRef.id;
                     currentAttendedCount = attendedStudents;
-
                     document.getElementById('classInfoStatus').classList.remove('hidden');
                     document.getElementById('classInfoBtnContainer').classList.add('hidden');
                     document.getElementById('className').disabled = true;
                     document.getElementById('totalStudents').disabled = true;
                     document.getElementById('attendedStudents').disabled = true;
                     document.getElementById('classInfoSection').classList.add('opacity-70');
-
                     document.getElementById('displayAttended').textContent = currentAttendedCount;
                     const voteForm = document.getElementById('voteResultForm');
                     voteForm.classList.remove('hidden');
@@ -468,82 +406,64 @@
                         voteForm.classList.remove('opacity-0');
                         voteForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }, 50);
-                    
                     showMessage(`クラス情報（${className}）を送信しました。続けて各議題の投票結果を入力してください。`, "success");
-                    
                 } catch (error) {
                     console.error("Error adding document: ", error);
                     showMessage(`送信エラーが発生しました: ${error.message}`, "error");
                     setClassInfoButtonState(false);
                 }
             });
-
             document.getElementById('voteResultForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
-                
                 if (!currentUser || !currentDocumentId) {
                     showMessage("不正な操作です。クラス情報を先に送信してください。", "error");
                     return;
                 }
-
                 const getVal = (id) => {
                     const input = document.getElementById(id);
                     if (!input) return 0;
                     const val = input.value;
                     return val ? parseInt(val, 10) : 0;
                 };
-
                 const voteData = {
                     step: 2, 
                     completedAt: serverTimestamp()
                 };
-
                 for (const ag of currentAgendas) {
                     const num = ag.number;
                     const yes = getVal(`agenda${num}Yes`);
                     const no = getVal(`agenda${num}No`);
-
                     if (yes + no > currentAttendedCount) {
                         showMessage(`第${num}号議案の「賛成と反対の合計数（${yes + no}票）」が「出席人数（${currentAttendedCount}人）」を上回っています。`, "error");
                         document.getElementById(`agenda${num}Yes`).focus();
                         return;
                     }
-
                     voteData[`agenda${num}`] = { yes, no };
                 }
-
                 setVoteButtonState(true);
                 document.getElementById('messageArea').classList.add('hidden');
-
                 try {
                     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'votes', currentDocumentId);
                     await updateDoc(docRef, voteData);
-                    
                     showMessage(`すべての投票結果を正常に送信しました！ご協力ありがとうございます。`, "success");
-                    
                     const voteForm = document.getElementById('voteResultForm');
                     const inputs = voteForm.querySelectorAll('input');
                     inputs.forEach(input => input.disabled = true);
-                    
                     const submitBtn = document.getElementById('submitVoteBtn');
                     submitBtn.disabled = true;
                     submitBtn.classList.replace('bg-teal-600', 'bg-slate-400');
                     submitBtn.classList.replace('hover:bg-teal-700', 'hover:bg-slate-400');
                     submitBtn.innerHTML = `<i class="ph-fill ph-check-circle text-xl"></i><span>送信完了</span>`;
-                    
                     const resetDiv = document.createElement('div');
                     resetDiv.className = "mt-6 text-center";
                     resetDiv.innerHTML = `<button type="button" onclick="location.reload()" class="text-blue-600 font-bold hover:underline underline-offset-4"><i class="ph ph-arrow-counter-clockwise mr-1"></i>別のクラスの結果を入力する</button>`;
                     voteForm.appendChild(resetDiv);
-                    
                 } catch (error) {
                     console.error("Error updating document: ", error);
                     showMessage(`送信エラーが発生しました: ${error.message}`, "error");
                     setVoteButtonState(false);
                 }
             });
-
-            // 起動
             initFirebase();
         });
     </script>
