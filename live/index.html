@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生徒総会 リアルタイム配信 [RACKMOUNT VFD SYSTEM]</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        body {
+            background-color: #030507;
+            font-family: 'Share Tech Mono', 'M PLUS 1p', sans-serif;
+            overflow: hidden; /* スクロール完全無効化 */
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        /* 近未来的な背景グリッドと装飾 */
+        .cyber-bg {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(0, 255, 204, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 204, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: -2;
+        }
+
+        /* 16:9アスペクト比を維持しつつ最大化するラッパー */
+        .rack-wrapper {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2vmin;
+            box-sizing: border-box;
+        }
+
+        /* ラックマウントのフレーム構造 */
+        .rack-frame {
+            background-color: #0a0a0a;
+            border: 4px solid #1a1a1a;
+            border-top-color: #2a2a2a;
+            border-left-color: #2a2a2a;
+            border-radius: 8px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(0,0,0,1);
+            padding: 4px;
+        }
+
+        /* サーバーラックユニット本体の金属・ヘアライン質感 */
+        .rack-unit {
+            flex: 1;
+            min-height: 0; /* Flexbox内で溢れるのを防ぐ */
+            background-color: #2b2b2b;
+            background-image: 
+                linear-gradient(to bottom, #4a4a4a 0%, #2b2b2b 15%, #1a1a1a 100%),
+                repeating-linear-gradient(to right, transparent, transparent 2px, rgba(255,255,255,0.02) 2px, rgba(255,255,255,0.02) 4px);
+            border: 2px solid #000;
+            border-top: 1px solid #5a5a5a;
+            border-radius: 4px;
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.1), 0 4px 8px rgba(0,0,0,0.5);
+            display: flex;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        /* ラックマウントの耳 (左右) */
+        .rack-ear {
+            width: 4%;
+            min-width: 20px;
+            background-color: #222;
+            background-image: linear-gradient(90deg, #2a2a2a, #151515);
+            border-right: 2px solid #000;
+            border-left: 1px solid #444;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            align-items: center;
+            padding: 4px 0;
+            z-index: 10;
+        }
+
+        /* ラック固定用の穴とネジ */
+        .rack-screw {
+            width: 60%;
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #aaa, #222);
+            box-shadow: 0 1px 3px rgba(0,0,0,1);
+            position: relative;
+        }
+        .rack-screw::before, .rack-screw::after {
+            content: '';
+            position: absolute;
+            background: #111;
+        }
+        .rack-screw::before {
+            top: 50%; left: 15%; right: 15%; height: 1px;
+            transform: translateY(-50%) rotate(45deg);
+        }
+        .rack-screw::after {
+            top: 15%; bottom: 15%; left: 50%; width: 1px;
+            transform: translateX(-50%) rotate(45deg);
+        }
+
+        /* VFDディスプレイスモークガラス枠 */
+        .vfd-bezel {
+            background-color: #020406; /* 基板の奥の暗闇 */
+            border-radius: 4px;
+            border: 3px solid #000;
+            border-bottom-color: #222;
+            border-right-color: #222;
+            box-shadow: inset 0 10px 30px rgba(0,0,0,1), 0 1px 0 rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* スモークガラスの反射効果 */
+        .glass-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 45%, rgba(255,255,255,0.02) 100%);
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        /* Canvas本体の設定 */
+        .vfd-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0px 0px 4px rgba(0, 255, 204, 0.7));
+            position: relative;
+            z-index: 10;
+        }
+
+        /* パネル上のシルクスクリーン印刷風テキスト */
+        .panel-print {
+            color: #d1d5db;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.8);
+            letter-spacing: 0.1em;
+        }
+        .panel-print-accent {
+            color: #00ffcc;
+            text-shadow: 0 0 5px rgba(0,255,204,0.5), 0 1px 1px rgba(0,0,0,0.8);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="cyber-bg"></div>
+
+    <!-- メインコンテンツ (16:9の比率を維持して最大化表示) -->
+    <div class="rack-wrapper">
+        <div class="w-full max-h-full aspect-video rack-frame flex flex-col gap-1 relative">
+            
+            <!-- マスターヘッダーユニット -->
+            <div class="flex-none h-[12%] rack-unit flex items-center px-4 relative z-10">
+                <div class="flex-1">
+                    <div class="text-[1.2vmin] tracking-[0.3em] text-[#00ffcc]/60 mb-0.5">REALTIME TELEMETRY SYSTEM / MASTER NODE</div>
+                    <h1 class="text-[3vmin] font-bold tracking-wider text-[#00ffcc] leading-none" style="text-shadow: 0 0 10px rgba(0,255,204,0.5);">
+                        生徒総会 LIVE MONITOR
+                    </h1>
+                </div>
+                <div class="text-right flex flex-col items-end">
+                    <div id="connectionStatus" class="inline-flex items-center gap-2 text-[1.5vmin] font-bold text-rose-500 mb-0.5">
+                        <span class="relative flex h-2 w-2">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                        </span>
+                        CONNECTING...
+                    </div>
+                    <div id="globalStats" class="text-[1.2vmin] font-mono text-[#00ffcc]/80 tracking-widest">
+                        CLASSES: 0/0 (0%) | VOTERS: 0
+                    </div>
+                </div>
+            </div>
+
+            <!-- 議題ユニット格納コンテナ -->
+            <div class="flex-1 flex flex-col gap-1 relative min-h-0" id="rackContainer">
+                <!-- 初期ローディング画面 -->
+                <div id="loadingOverlay" class="absolute inset-0 flex flex-col items-center justify-center bg-[#050505]/90 z-30 rounded-md backdrop-blur-sm">
+                    <i class="ph ph-circle-notch animate-spin text-[#00ffcc] mb-4 text-5xl"></i>
+                    <div class="tracking-widest animate-pulse font-bold text-[#00ffcc] text-[2vmin]">WAITING FOR DATA SIGNAL...</div>
+                </div>
+                <!-- 動的にrack-unitがここに追加されます -->
+            </div>
+
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ==========================================
+        // VFD ドットマトリクス・レンダリングエンジン
+        // ==========================================
+        class VFDRenderer {
+            constructor(canvasId, agenda, type) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d', { alpha: false });
+                
+                this.offCanvas = document.createElement('canvas');
+                this.offCtx = this.offCanvas.getContext('2d', { willReadFrequently: true });
+                
+                this.agenda = agenda;
+                this.type = type; // 'main' or 'status'
+                
+                // VFDの論理解像度 (横に長くするか、短くするか)
+                this.logicW = type === 'main' ? 480 : 140; 
+                this.logicH = 40; // 初期値
+                this.scale = 1;
+
+                this.colors = {
+                    bg: '#020406',       
+                    offDot: '#001a1a',   
+                    yes: '#00ffff',      // シアン (賛成・可決)
+                    no: '#ff3366',       // ピンク/赤 (反対・否決)
+                    abstain: '#555555',  // グレー (棄権・背景)
+                    pending: '#ffcc00'   // 黄色/オレンジ (審議中)
+                };
+            }
+
+            updateSize() {
+                const parent = this.canvas.parentElement;
+                if (!parent) return;
+                const rect = parent.getBoundingClientRect();
+                if (rect.width === 0 || rect.height === 0) return;
+
+                // 横幅に合わせてドットサイズ(スケール)を決定
+                this.scale = Math.max(1, rect.width / this.logicW);
+                // 高さに合わせて論理縦ドット数を決定
+                this.logicH = Math.max(10, Math.floor(rect.height / this.scale));
+
+                this.canvas.width = rect.width;
+                this.canvas.height = rect.height;
+                this.offCanvas.width = this.logicW;
+                this.offCanvas.height = this.logicH;
+            }
+
+            drawLogic() {
+                const ctx = this.offCtx;
+                const lw = this.logicW;
+                const lh = this.logicH;
+
+                // 黒(非発光)でクリア
+                ctx.fillStyle = '#000000'; 
+                ctx.fillRect(0, 0, lw, lh);
+
+                if (!this.agenda) return;
+
+                let yes = 0, no = 0;
+                window.globalVotes.forEach(v => {
+                    if (v.step === 2 && v[`agenda${this.agenda.number}`]) {
+                        yes += (v[`agenda${this.agenda.number}`].yes || 0);
+                        no += (v[`agenda${this.agenda.number}`].no || 0);
+                    }
+                });
+                
+                const base = window.globalAttended;
+                const yesPct = base > 0 ? (yes / base) : 0;
+                const noPct = base > 0 ? (no / base) : 0;
+
+                const cy = lh / 2; 
+
+                if (this.type === 'main') {
+                    // --- メインVFD (グラフと数値) ---
+                    const barW = lw * 0.35;
+                    const barX = (lw - barW) / 2;
+                    const barH = Math.max(8, lh * 0.3); 
+                    const barY = cy - (barH / 2);
+                    
+                    ctx.fillStyle = this.colors.abstain; 
+                    ctx.fillRect(barX, barY, barW, barH);
+
+                    const yesW = barW * yesPct;
+                    if (yesW > 0) {
+                        ctx.fillStyle = this.colors.yes;
+                        ctx.fillRect(barX, barY, yesW, barH);
+                    }
+
+                    const noW = barW * noPct;
+                    if (noW > 0) {
+                        ctx.fillStyle = this.colors.no;
+                        ctx.fillRect(barX + yesW, barY, noW, barH);
+                    }
+
+                    // 左右の数値表示
+                    const fontSizeNum = Math.max(14, Math.min(32, lh * 0.6));
+                    ctx.font = `${fontSizeNum}px "Share Tech Mono", monospace`;
+                    ctx.textBaseline = 'middle';
+                    
+                    ctx.fillStyle = this.colors.yes;
+                    ctx.textAlign = 'right';
+                    ctx.fillText(`${yes.toString().padStart(3, '0')} (${Math.round(yesPct*100)}%)`, barX - 10, cy);
+                    
+                    ctx.fillStyle = this.colors.no;
+                    ctx.textAlign = 'left';
+                    ctx.fillText(`(${Math.round(noPct*100)}%) ${no.toString().padStart(3, '0')}`, barX + barW + 10, cy);
+                
+                } else if (this.type === 'status') {
+                    // --- ステータスVFD (可決/否決/審議中) ---
+                    let statusText = "PENDING";
+                    let color = this.colors.pending;
+
+                    if (base > 0) {
+                        if (yes > base / 2) {
+                            // 賛成が過半数
+                            statusText = "APPROVED";
+                            color = this.colors.yes;
+                        } else if (no > base / 2) {
+                            // 反対が過半数
+                            statusText = "REJECTED";
+                            color = this.colors.no;
+                        } else if (window.globalTotalClasses > 0 && window.globalCompletedClasses >= window.globalTotalClasses) {
+                            // 全クラスが投票を終えたのに賛成が過半数に届かなかった場合は否決扱い
+                            statusText = "REJECTED";
+                            color = this.colors.no;
+                        }
+                    }
+
+                    const fontSizeStatus = Math.max(12, Math.min(36, lh * 0.7));
+                    ctx.font = `${fontSizeStatus}px "Share Tech Mono", monospace`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = color;
+                    ctx.fillText(statusText, lw / 2, cy);
+                }
+            }
+
+            render() {
+                this.updateSize();
+                this.drawLogic();
+
+                this.ctx.fillStyle = this.colors.bg;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                const imgData = this.offCtx.getImageData(0, 0, this.logicW, this.logicH).data;
+                const s = this.scale;
+                
+                // スケールに応じてドット間の隙間を計算し、メッシュ感を演出
+                const d = s > 1.5 ? s * 0.8 : s; 
+                const off = (s - d) / 2;
+
+                const paths = {
+                    off: new Path2D(),
+                    [this.colors.yes]: new Path2D(),
+                    [this.colors.no]: new Path2D(),
+                    [this.colors.abstain]: new Path2D(),
+                    [this.colors.pending]: new Path2D()
+                };
+
+                for(let y = 0; y < this.logicH; y++) {
+                    for(let x = 0; x < this.logicW; x++) {
+                        const i = (y * this.logicW + x) * 4;
+                        const r = imgData[i];
+                        const g = imgData[i+1];
+                        const b = imgData[i+2];
+
+                        const dx = x * s + off;
+                        const dy = y * s + off;
+
+                        if (r < 10 && g < 10 && b < 10) {
+                            paths.off.rect(dx, dy, d, d);
+                        } else {
+                            // 色の簡易判定
+                            let c = this.colors.abstain; 
+                            if (g > 150 && b > 150 && r < 100) c = this.colors.yes;       // シアン
+                            else if (r > 150 && g < 100 && b < 150) c = this.colors.no;   // レッド
+                            else if (r > 150 && g > 150 && b < 100) c = this.colors.pending; // イエロー
+
+                            if (paths[c]) paths[c].rect(dx, dy, d, d);
+                        }
+                    }
+                }
+
+                // 一括描画
+                this.ctx.fillStyle = this.colors.offDot;
+                this.ctx.fill(paths.off);
+
+                for (const color in paths) {
+                    if (color === 'off') continue;
+                    this.ctx.fillStyle = color;
+                    this.ctx.fill(paths[color]);
+                }
+            }
+        }
+
+        // ==========================================
+        // アプリケーション ロジック
+        // ==========================================
+        
+        window.globalVotes = [];
+        window.globalAttended = 0;
+        window.globalTotalClasses = 0;
+        window.globalCompletedClasses = 0;
+        
+        let renderers = [];
+        let currentAgendaIds = '';
+        let animationFrameId = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            let db, auth;
+
+            const setConnectionStatus = (isOnline) => {
+                const el = document.getElementById('connectionStatus');
+                if (isOnline) {
+                    el.className = "inline-flex items-center gap-2 text-[1.5vmin] font-bold text-[#00ffcc] mb-0.5";
+                    el.innerHTML = `
+                        <span class="relative flex h-2 w-2">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00ffcc] opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-[#00ffcc]"></span>
+                        </span>
+                        DATA LINK ACTIVE
+                    `;
+                } else {
+                    el.className = "inline-flex items-center gap-2 text-[1.5vmin] font-bold text-rose-500 mb-0.5";
+                    el.innerHTML = `
+                        <span class="relative flex h-2 w-2">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                        </span>
+                        CONNECTION LOST
+                    `;
+                }
+            };
+
+            const initFirebase = async () => {
+                try {
+                    const firebaseConfig = {
+                        apiKey: "AIzaSyCNbylYM-96elHEwq122riR48ZRc-mU_B8",
+                        authDomain: "v-s-system.firebaseapp.com",
+                        projectId: "v-s-system",
+                        storageBucket: "v-s-system.firebasestorage.app",
+                        messagingSenderId: "639176585909",
+                        appId: "1:639176585909:web:2abf53f9f0cc37fce244fc"
+                    };
+
+                    const app = initializeApp(firebaseConfig);
+                    auth = getAuth(app);
+                    db = getFirestore(app);
+
+                    await signInAnonymously(auth);
+
+                    setConnectionStatus(true);
+                    startDataSync();
+
+                } catch (error) {
+                    console.error("Firebase Init Error:", error);
+                    setConnectionStatus(false);
+                    document.getElementById('loadingOverlay').innerHTML = `
+                        <i class="ph ph-warning-circle text-[5vmin] mb-4 text-rose-500"></i>
+                        <div class="tracking-widest font-bold text-[2vmin] text-rose-500">SYSTEM FAILURE.</div>
+                    `;
+                }
+            };
+
+            const renderLoop = () => {
+                renderers.forEach(r => r.render());
+                animationFrameId = requestAnimationFrame(renderLoop);
+            };
+
+            const rebuildRack = (agendas) => {
+                if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                renderers = [];
+                
+                const container = document.getElementById('rackContainer');
+                Array.from(container.children).forEach(child => {
+                    if (child.id !== 'loadingOverlay') container.removeChild(child);
+                });
+
+                if(agendas.length === 0) {
+                    document.getElementById('loadingOverlay').innerHTML = `
+                        <div class="tracking-widest animate-pulse font-bold text-[#00ffcc] text-[2vmin]">NO AGENDAS DETECTED.</div>
+                    `;
+                    document.getElementById('loadingOverlay').classList.remove('hidden');
+                    return;
+                }
+                
+                document.getElementById('loadingOverlay').classList.add('hidden');
+
+                // 議題ごとに独立したラックユニットを生成
+                agendas.forEach(ag => {
+                    const numStr = ag.number.toString().padStart(2, '0');
+                    const themeStr = ag.theme || 'NO THEME';
+                    const div = document.createElement('div');
+                    div.className = 'rack-unit';
+                    div.innerHTML = `
+                        <!-- 左耳 -->
+                        <div class="rack-ear">
+                            <div class="rack-screw"></div><div class="rack-screw"></div>
+                        </div>
+                        
+                        <!-- ユニットフロントパネル -->
+                        <div class="flex-1 flex flex-col justify-center px-4 sm:px-6 py-2 sm:py-4 relative overflow-hidden">
+                            
+                            <!-- 上段: 筐体にプリントされた議題テーマ と ステータスVFD -->
+                            <div class="flex justify-between items-end mb-1 sm:mb-2">
+                                <div class="panel-print font-bold flex items-baseline gap-3 sm:gap-4">
+                                    <span class="panel-print-accent text-[2.5vmin] sm:text-[3.5vmin] leading-none border-l-4 border-[#00ffcc] pl-2">第${numStr}号議案</span>
+                                    <span class="text-[2vmin] sm:text-[2.8vmin] leading-none truncate max-w-[40vw]">${themeStr}</span>
+                                </div>
+                                <div class="vfd-bezel w-[16vw] sm:w-[12vw] h-[4vmin] min-h-[20px] flex-shrink-0 relative">
+                                    <div class="glass-overlay"></div>
+                                    <canvas class="vfd-canvas" id="vfd-status-${ag.id}"></canvas>
+                                </div>
+                            </div>
+                            
+                            <!-- 下段: メインVFDとプリントされたラベル -->
+                            <div class="flex items-center gap-4 flex-1 min-h-0 mt-1 sm:mt-2">
+                                <div class="flex-1 flex flex-col h-full justify-center gap-1 sm:gap-2">
+                                    <div class="flex justify-between panel-print font-bold px-2 sm:px-4 tracking-widest text-[1.5vmin] sm:text-[2vmin]">
+                                        <span>&lt;&lt; APPROVE [YES]</span>
+                                        <span>REJECT [NO] &gt;&gt;</span>
+                                    </div>
+                                    <div class="vfd-bezel w-full flex-1 min-h-[30px]">
+                                        <div class="glass-overlay"></div>
+                                        <canvas class="vfd-canvas" id="vfd-main-${ag.id}"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- 右耳 -->
+                        <div class="rack-ear">
+                            <div class="rack-screw"></div><div class="rack-screw"></div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                    
+                    // 1つの議題に対して「メインVFD」「ステータスVFD」の2つのレンダラーを登録
+                    renderers.push(new VFDRenderer(`vfd-main-${ag.id}`, ag, 'main'));
+                    renderers.push(new VFDRenderer(`vfd-status-${ag.id}`, ag, 'status'));
+                });
+
+                // フォント読み込み完了を待ってからレンダリング開始
+                document.fonts.ready.then(() => {
+                    renderLoop();
+                });
+            };
+
+            const startDataSync = () => {
+                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'agendas'), (snap) => {
+                    let agendas = [];
+                    snap.forEach(d => agendas.push({ id: d.id, ...d.data() }));
+                    agendas.sort((a, b) => (a.number || 0) - (b.number || 0));
+                    
+                    const newIds = agendas.map(a => a.id).join(',');
+                    if (currentAgendaIds !== newIds) {
+                        currentAgendaIds = newIds;
+                        rebuildRack(agendas);
+                    } else {
+                        agendas.forEach(ag => {
+                            const rMain = renderers.find(rnd => rnd.agenda.id === ag.id && rnd.type === 'main');
+                            const rStatus = renderers.find(rnd => rnd.agenda.id === ag.id && rnd.type === 'status');
+                            if (rMain) rMain.agenda = ag;
+                            if (rStatus) rStatus.agenda = ag;
+                            
+                            // テーマ名が変更された場合、プリント部分のDOMも更新
+                            if (rMain) {
+                                const unitEl = document.getElementById(`vfd-main-${ag.id}`).closest('.rack-unit');
+                                if(unitEl) {
+                                    const themeSpan = unitEl.querySelector('.panel-print span:nth-child(2)');
+                                    if(themeSpan) themeSpan.textContent = ag.theme || 'NO THEME';
+                                }
+                            }
+                        });
+                    }
+                });
+
+                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'votes'), (snap) => {
+                    let votes = [];
+                    let completed = 0;
+                    let attended = 0;
+                    
+                    snap.forEach(d => {
+                        const data = d.data();
+                        votes.push({ id: d.id, ...data });
+                        if (data.step === 2) {
+                            completed++;
+                            attended += (data.attendedStudents || 0);
+                        }
+                    });
+                    
+                    window.globalVotes = votes;
+                    window.globalAttended = attended;
+                    window.globalTotalClasses = votes.length;
+                    window.globalCompletedClasses = completed;
+
+                    const total = votes.length;
+                    const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+                    document.getElementById('globalStats').textContent = `CLASSES: ${completed}/${total} (${pct}%) | VOTERS: ${attended}`;
+                });
+            };
+
+            initFirebase();
+        });
+    </script>
+</body>
+</html>
