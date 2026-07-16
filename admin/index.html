@@ -800,7 +800,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, addDoc, getDocs, setDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         window.addEventListener('DOMContentLoaded', () => {
             const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -975,13 +975,16 @@
 
                 try {
                     const accountsRef = collection(db, 'artifacts', appId, 'public', 'data', 'accounts');
-                    const snapshot = await getDocs(accountsRef);
+                    // 修正: 入力されたIDに一致するアカウントだけをデータベースに要求する
+                    const q = query(accountsRef, where("userId", "==", idInput));
+                    const snapshot = await getDocs(q);
                     
                     let foundAccount = null;
-                    snapshot.forEach(doc => {
-                        if (doc.data().userId === idInput) foundAccount = doc.data();
-                    });
+                    if (!snapshot.empty) {
+                        foundAccount = snapshot.docs[0].data();
+                    }
 
+                    // 初回ログイン用のフェールセーフ
                     if (snapshot.empty && idInput === 'admin' && passInput === 'admin') {
                         foundAccount = { userId: 'admin', password: 'admin', role: 'admin' };
                     }
