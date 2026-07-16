@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>生徒会管理コンソール - データエディタ [Version 0.31]</title>
+    <title>生徒総会 議題管理システム [Version 0.1]</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -99,11 +99,12 @@
         }
 
         .list-item {
-            padding: 4px 8px;
+            padding: 6px 8px;
             cursor: default;
             border-bottom: 1px dotted #808080;
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
         .list-item:hover {
             background-color: #000080;
@@ -165,10 +166,10 @@
         
         <header class="win-outset flex items-center justify-between p-1.5 mb-2">
             <div class="flex items-center gap-2">
-                <i class="ph-bold ph-database text-xl text-[#000080]"></i>
+                <i class="ph-bold ph-gear text-xl text-[#000080]"></i>
                 <div class="font-bold">
                     <span class="text-black">生徒会管理コンソール -</span> 
-                    <span class="text-[#000080]">投票データエディタ [Version 0.31]</span>
+                    <span class="text-[#000080]">総会議題管理プロパティ [Version 0.1]</span>
                 </div>
             </div>
             <div class="flex items-center gap-4">
@@ -176,7 +177,7 @@
                     <a href="https://ataro-qqq.github.io/V.S./viewer/" class="win-btn px-2 py-0.5 font-bold flex items-center gap-1 text-black hover:bg-[#ffffff] text-xs">
                         <i class="ph ph-chart-bar"></i> ビューアー
                     </a>
-                    <a href="https://ataro-qqq.github.io/V.S./editor/" class="win-inset px-2 py-0.5 font-bold flex items-center gap-1 text-[#808080] bg-[#c0c0c0] pointer-events-none select-none text-xs">
+                    <a href="https://ataro-qqq.github.io/V.S./editor/" class="win-btn px-2 py-0.5 font-bold flex items-center gap-1 text-black hover:bg-[#ffffff] text-xs">
                         <i class="ph ph-pencil"></i> エディタ
                     </a>
                 </div>
@@ -202,19 +203,19 @@
             </div>
         </div>
 
-        <div class="flex flex-row gap-4 h-[550px]">
+        <div class="flex flex-row gap-4 h-[500px]">
 
-            <div class="w-[300px] flex-shrink-0 flex flex-col h-full win-outset">
+            <div class="w-[320px] flex-shrink-0 flex flex-col h-full win-outset">
                 <div class="win-titlebar flex items-center justify-between">
-                    <span class="flex items-center gap-1"><i class="ph ph-list"></i> 登録データ一覧</span>
+                    <span class="flex items-center gap-1"><i class="ph ph-list-numbers"></i> 登録議題一覧</span>
                 </div>
                 <div class="p-1 bg-[#c0c0c0] border-b border-[#808080] flex justify-between items-center">
                     <button id="btnNew" class="win-btn px-2 py-0.5 font-bold flex items-center gap-1 focus:outline-none">
-                        <i class="ph ph-plus"></i> 新規追加
+                        <i class="ph ph-plus"></i> 議題を追加
                     </button>
                     <span class="text-[10px] text-[#808080] mr-1" id="listCount">0 件</span>
                 </div>
-                <div class="flex-1 bg-white overflow-y-auto" id="dataList">
+                <div class="flex-1 bg-white overflow-y-auto" id="agendaList">
                     <div class="p-4 text-center text-[#808080]">
                         <i class="ph ph-spinner animate-spin"></i> 読込中...
                     </div>
@@ -224,52 +225,43 @@
             <div class="flex-1 flex flex-col h-full win-outset relative">
                 <div id="editorOverlay" class="absolute inset-0 dither-overlay z-10 flex items-center justify-center">
                     <div class="bg-[#c0c0c0] win-outset p-4 text-center text-black">
-                        左のリストからデータを選択するか、<br>「新規追加」を押してください。
+                        左のリストから議題を選択するか、<br>「議題を追加」を押してください。
                     </div>
                 </div>
 
                 <div class="win-titlebar flex items-center justify-between">
-                    <span class="flex items-center gap-1"><i class="ph ph-pencil"></i> データ編集プロパティ</span>
+                    <span class="flex items-center gap-1"><i class="ph ph-pencil-simple"></i> 議題詳細設定</span>
                 </div>
                 
                 <div class="flex-1 overflow-y-auto p-4 bg-[#c0c0c0]">
                     <form id="editorForm" onsubmit="event.preventDefault();">
                         
                         <fieldset class="win-groupbox mt-0 bg-[#c0c0c0]">
-                            <legend>基本情報</legend>
+                            <legend>議題情報</legend>
                             <table class="w-full text-sm">
                                 <tr>
-                                    <td class="p-1 w-24">クラス名:</td>
-                                    <td class="p-1"><input type="text" id="editClassName" class="win-inset w-full p-1 bg-white" required></td>
-                                </tr>
-                                <tr>
-                                    <td class="p-1">ステータス:</td>
-                                    <td class="p-1">
-                                        <select id="editStep" class="win-inset w-full p-1 bg-white">
-                                            <option value="1">入力中 (1)</option>
-                                            <option value="2">完了 (2)</option>
-                                        </select>
+                                    <td class="p-1.5 w-28 text-black font-bold">議題番号 (半角):</td>
+                                    <td class="p-1.5">
+                                        <input type="number" id="editNumber" class="win-inset w-24 p-1 bg-white text-black font-mono text-right" min="1" required placeholder="例: 1">
+                                        <span class="text-[10px] text-[#808080] ml-2">※第何号議案かを示す数値</span>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="p-1">在籍数:</td>
-                                    <td class="p-1"><input type="number" id="editTotal" class="win-inset w-32 p-1 bg-white text-right" min="0" required></td>
-                                </tr>
-                                <tr>
-                                    <td class="p-1">出席数:</td>
-                                    <td class="p-1"><input type="number" id="editAttended" class="win-inset w-32 p-1 bg-white text-right" min="0" required></td>
+                                    <td class="p-1.5 text-black font-bold">議題テーマ:</td>
+                                    <td class="p-1.5">
+                                        <input type="text" id="editTheme" class="win-inset w-full p-1 bg-white text-black" required placeholder="例: 生徒会費決算報告の承認について">
+                                    </td>
                                 </tr>
                             </table>
                         </fieldset>
 
-                        <fieldset class="win-groupbox bg-[#c0c0c0]">
-                            <legend>投票データ (完了ステータス時のみ有効)</legend>
-                            <div class="grid grid-cols-2 gap-4" id="agendasInputContainer">
-                                <div class="col-span-2 text-center text-[#808080] py-4">
-                                    <i class="ph ph-spinner animate-spin text-lg mr-1 align-middle"></i> 議題データを読み込み中...
-                                </div>
+                        <div class="win-inset p-3 bg-[#ffff00] mt-4 font-mono text-[11px] text-black">
+                            <div class="font-bold text-[#000080] mb-1">【設定反映の注意点】</div>
+                            <div>
+                                ここで設定した議題番号・テーマは、集計ビューアー、クラス報告用フォーム、管理エディタの全ページに対してリアルタイムで連動します。
+                                すでに報告が完了しているクラスの投票結果に直接影響するため、集計中の議題番号の変更は慎重に行ってください。
                             </div>
-                        </fieldset>
+                        </div>
                     </form>
                 </div>
                 
@@ -278,7 +270,7 @@
                         <i class="ph ph-trash"></i> 削除
                     </button>
                     <button id="btnSave" class="win-btn px-6 py-1 font-bold focus:outline-none" disabled>
-                        <i class="ph ph-floppy-disk"></i> 保存
+                        <i class="ph ph-floppy-disk"></i> 議題を保存
                     </button>
                 </div>
             </div>
@@ -286,10 +278,10 @@
         </div>
     </div>
 
-    <div id="confirmDialog" class="hidden fixed inset-0 z-[150] flex items-center justify-center dither-overlay">
+    <div id="confirmDialog" class="hidden fixed inset-0 z-50 flex items-center justify-center">
         <div class="win-outset w-80 shadow-[2px_2px_10px_rgba(0,0,0,0.5)]">
             <div class="win-titlebar flex justify-between items-center">
-                <span>警告 - データの削除</span>
+                <span>警告 - 議題の削除</span>
                 <button class="win-btn w-4 h-4 flex items-center justify-center" onclick="closeConfirmDialog()">
                     <svg width="6" height="6" viewBox="0 0 6 6" fill="none" xmlns="http://www.w3.org/2000/svg" class="align-middle">
                         <path d="M0.5 0.5L5.5 5.5M5.5 0.5L0.5 5.5" stroke="black" stroke-width="1.5"/>
@@ -298,15 +290,15 @@
             </div>
             <div class="p-4 bg-[#c0c0c0] flex gap-4 items-start">
                 <i class="ph-fill ph-warning-circle text-4xl text-[#ffff00] bg-black rounded-full leading-none"></i>
-                <div class="text-[13px] mt-1">
-                    選択したクラスのデータを完全に削除します。<br>
-                    この操作は元に戻せません。<br>
-                    本当によろしいですか？
+                <div class="text-[13px] mt-1 text-black">
+                    選択した議題データを完全に削除します。<br>
+                    この議題に関連付けられた各クラスの集計データもビューから非表示になります。<br><br>
+                    本当に削除してもよろしいですか？
                 </div>
             </div>
             <div class="p-2 bg-[#c0c0c0] border-t border-[#808080] flex justify-end gap-2">
-                <button id="confirmYes" class="win-btn px-4 py-1 focus:outline-none focus:ring-1 focus:ring-black font-bold">はい(Y)</button>
-                <button id="confirmNo" class="win-btn px-4 py-1 focus:outline-none focus:ring-1 focus:ring-black font-bold" onclick="closeConfirmDialog()">いいえ(N)</button>
+                <button id="confirmYes" class="win-btn px-4 py-1 focus:outline-none focus:ring-1 focus:ring-black">はい(Y)</button>
+                <button id="confirmNo" class="win-btn px-4 py-1 focus:outline-none focus:ring-1 focus:ring-black" onclick="closeConfirmDialog()">いいえ(N)</button>
             </div>
         </div>
     </div>
@@ -321,9 +313,8 @@
             let db;
             let auth;
             let currentUser = null;
-            let currentDocsMap = {}; 
-            let selectedDocId = null;
-            let currentAgendas = [];
+            let currentAgendasMap = {}; 
+            let selectedAgendaId = null;
 
             const updateClock = () => {
             if (clockEl) {
@@ -374,67 +365,6 @@
                 auth = getAuth(app);
                 db = getFirestore(app);
 
-                setAlert("認証試行中...", true);
-
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                onAuthStateChanged(auth, (user) => {
-                    currentUser = user;
-                    if (user) {
-                        setAlert("オンライン/同期完了", true, true);
-                        startRealtimeSync();
-                    } else {
-                        setAlert("Firebase認証に失敗しました。再読み込みしてください。", true);
-                    }
-                });
-
-            } catch (error) {
-                console.error("Firebase Initialization Error:", error);
-                setAlert(`接続エラー: ${error.message}`, true);
-            }
-        };
-
-        const startRealtimeSync = () => {
-            if (!currentUser) return;
-
-            const votesCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'votes');
-            const agendasCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'agendas');
-
-            onSnapshot(votesCollectionRef, (snapshot) => {
-                const map = {};
-                snapshot.forEach((doc) => {
-                    map[doc.id] = { id: doc.id, ...doc.data() };
-                });
-                currentDocsMap = map;
-                renderList();
-            }, (error) => {
-                console.error("Firestore Listen Error (votes):", error);
-                setAlert(`データ受信エラー: ${error.message}`, true);
-            });
-
-            onSnapshot(agendasCollectionRef, (snapshot) => {
-                const agendas = [];
-                snapshot.forEach((doc) => {
-                    agendas.push({ id: doc.id, ...doc.data() });
-                });
-                currentAgendas = agendas.sort((a, b) => (a.number || 0) - (b.number || 0));
-                renderAgendasInput();
-            }, (error) => {
-                console.error("Firestore Listen Error (agendas):", error);
-                setAlert(`議題データ受信エラー: ${error.message}`, true);
-            });
-        };
-
-        const renderAgendasInput = () => {
-            const container = document.getElementById('agendasInputContainer');
-            if (currentAgendas.length === 0) {
-                container.innerHTML = `<div class="col-span-2 text-center text-[#808080] py-4">議題が設定されていません。</div>`;
-                return;
-            }
             const setAlert = (message, show = true, isSuccess = false) => {
                 const alertEl = document.getElementById('statusAlert');
                 const alertMsg = document.getElementById('alertMessage');
@@ -587,21 +517,21 @@
             const startRealtimeSync = () => {
                 if (!currentUser) return;
 
-                const votesCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'votes');
-                    const docRef = await addDoc(votesCollectionRef, data);
-                    setAlert(`${className} を新規追加しました。`, true, true);
-                    selectDocument(docRef.id);
+                const agendasCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'agendas');
+                    const docRef = await addDoc(agendasCollectionRef, data);
+                    setAlert(`第 ${number} 号議案を追加しました。`, true, true);
+                    selectAgenda(docRef.id);
                 } else {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'votes', selectedDocId);
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'agendas', selectedAgendaId);
                     await updateDoc(docRef, data);
-                    setAlert(`${className} のデータを更新しました。`, true, true);
+                    setAlert(`第 ${number} 号議案を更新しました。`, true, true);
                 }
             } catch (error) {
                 console.error("Save Error:", error);
                 setAlert(`保存エラー: ${error.message}`, true);
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = `<i class="ph ph-floppy-disk"></i> 保存`;
+                btn.innerHTML = `<i class="ph ph-floppy-disk"></i> 議題を保存`;
             }
         });
 
@@ -610,21 +540,21 @@
         };
 
         document.getElementById('btnDelete').addEventListener('click', () => {
-            if(!selectedDocId || selectedDocId === 'NEW') return;
+            if(!selectedAgendaId || selectedAgendaId === 'NEW') return;
             document.getElementById('confirmDialog').classList.remove('hidden');
         });
 
         document.getElementById('confirmYes').addEventListener('click', async () => {
-            if (!currentUser || !selectedDocId || selectedDocId === 'NEW') return;
+            if (!currentUser || !selectedAgendaId || selectedAgendaId === 'NEW') return;
             
             const btn = document.getElementById('confirmYes');
             btn.disabled = true;
 
             try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'votes', selectedDocId);
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'agendas', selectedAgendaId);
                 await deleteDoc(docRef);
-                setAlert(`データを削除しました。`, true, true);
-                deselectDocument();
+                setAlert(`議題データを削除しました。`, true, true);
+                deselectAgenda();
             } catch (error) {
                 console.error("Delete Error:", error);
                 setAlert(`削除エラー: ${error.message}`, true);
