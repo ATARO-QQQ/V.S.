@@ -9,7 +9,7 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
         body {
-            background-color: #030507;
+            background-color: #050505;
             font-family: 'Share Tech Mono', 'M PLUS 1p', sans-serif;
             overflow: hidden; /* スクロール完全無効化 */
             margin: 0;
@@ -22,8 +22,8 @@
             position: absolute;
             inset: 0;
             background-image: 
-                linear-gradient(rgba(0, 255, 204, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 204, 0.03) 1px, transparent 1px);
+                linear-gradient(rgba(0, 255, 204, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 204, 0.02) 1px, transparent 1px);
             background-size: 30px 30px;
             z-index: -2;
         }
@@ -39,15 +39,32 @@
             box-sizing: border-box;
         }
 
-        /* ラックマウントのフレーム構造 */
+        /* ラックマウントの重厚なフレーム構造 */
         .rack-frame {
-            background-color: #0a0a0a;
-            border: 4px solid #1a1a1a;
-            border-top-color: #2a2a2a;
-            border-left-color: #2a2a2a;
+            background-color: #111;
+            background-image: 
+                linear-gradient(45deg, #1a1a1a 25%, transparent 25%, transparent 75%, #1a1a1a 75%, #1a1a1a),
+                linear-gradient(45deg, #1a1a1a 25%, transparent 25%, transparent 75%, #1a1a1a 75%, #1a1a1a);
+            background-position: 0 0, 2px 2px;
+            background-size: 4px 4px;
+            border: 6px solid #222;
+            border-top-color: #333;
+            border-left-color: #333;
+            border-bottom-color: #0a0a0a;
+            border-right-color: #0a0a0a;
             border-radius: 8px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(0,0,0,1);
-            padding: 4px;
+            box-shadow: 0 30px 60px rgba(0,0,0,1), inset 0 0 30px rgba(0,0,0,1), inset 0 2px 5px rgba(255,255,255,0.1);
+            padding: 6px;
+            position: relative;
+        }
+
+        /* ラック内側の深い影 (機材が奥にある立体感) */
+        .rack-inner-shadow {
+            position: absolute;
+            inset: 6px;
+            box-shadow: inset 0 10px 20px rgba(0,0,0,0.8), inset 0 -10px 20px rgba(0,0,0,0.8);
+            pointer-events: none;
+            z-index: 100;
         }
 
         /* サーバーラックユニット本体の金属・ヘアライン質感 */
@@ -56,73 +73,120 @@
             min-height: 0; /* Flexbox内で溢れるのを防ぐ */
             background-color: #2b2b2b;
             background-image: 
-                linear-gradient(to bottom, #4a4a4a 0%, #2b2b2b 15%, #1a1a1a 100%),
-                repeating-linear-gradient(to right, transparent, transparent 2px, rgba(255,255,255,0.02) 2px, rgba(255,255,255,0.02) 4px);
-            border: 2px solid #000;
+                linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0) 10%, rgba(0,0,0,0.4) 95%, rgba(0,0,0,0.8) 100%),
+                repeating-linear-gradient(to right, transparent, transparent 1px, rgba(255,255,255,0.03) 1px, rgba(255,255,255,0.03) 2px);
+            border: 1px solid #111;
             border-top: 1px solid #5a5a5a;
-            border-radius: 4px;
-            box-shadow: inset 0 2px 4px rgba(255,255,255,0.1), 0 4px 8px rgba(0,0,0,0.5);
+            border-bottom: 2px solid #0a0a0a;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 5px 15px rgba(0,0,0,0.8);
             display: flex;
             box-sizing: border-box;
             position: relative;
+            margin-bottom: 2px;
         }
 
-        /* ラックマウントの耳 (左右) */
+        /* ラックマウントの耳 (左右の固定具) */
         .rack-ear {
             width: 4%;
-            min-width: 20px;
+            min-width: 24px;
             background-color: #222;
-            background-image: linear-gradient(90deg, #2a2a2a, #151515);
-            border-right: 2px solid #000;
-            border-left: 1px solid #444;
+            background-image: linear-gradient(90deg, #151515 0%, #3a3a3a 20%, #2a2a2a 80%, #111 100%);
+            border-right: 1px solid #111;
+            border-left: 1px solid #555;
             display: flex;
             flex-direction: column;
             justify-content: space-evenly;
             align-items: center;
             padding: 4px 0;
             z-index: 10;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+        }
+        .rack-ear.right {
+            border-right: 1px solid #555;
+            border-left: 1px solid #111;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.5);
+            background-image: linear-gradient(270deg, #151515 0%, #3a3a3a 20%, #2a2a2a 80%, #111 100%);
         }
 
-        /* ラック固定用の穴とネジ */
+        /* ラック固定用の四角い穴とプラスネジ */
+        .rack-screw-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10% 0;
+            position: relative;
+        }
+
+        /* ケージナット用の四角い穴の奥 */
+        .rack-hole-bg {
+            position: absolute;
+            width: 60%;
+            aspect-ratio: 1/1.5;
+            background: #050505;
+            border-radius: 2px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,1), 0 1px 0 rgba(255,255,255,0.1);
+            z-index: 1;
+        }
+
+        /* プラスネジのリアルな金属表現 */
         .rack-screw {
             width: 60%;
             aspect-ratio: 1 / 1;
             border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #aaa, #222);
-            box-shadow: 0 1px 3px rgba(0,0,0,1);
+            background: radial-gradient(circle at 35% 35%, #e0e0e0, #888 40%, #333 80%, #111 100%);
+            box-shadow: 
+                0 3px 6px rgba(0,0,0,0.9), 
+                inset 0 1px 2px rgba(255,255,255,0.9),
+                inset 0 -1px 2px rgba(0,0,0,0.5);
             position: relative;
+            z-index: 2;
         }
         .rack-screw::before, .rack-screw::after {
             content: '';
             position: absolute;
-            background: #111;
+            background: linear-gradient(to right, #111, #222, #111);
+            border-radius: 1px;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,1), 0 1px 0 rgba(255,255,255,0.2);
         }
         .rack-screw::before {
-            top: 50%; left: 15%; right: 15%; height: 1px;
-            transform: translateY(-50%) rotate(45deg);
+            top: 25%; bottom: 25%; left: 45%; right: 45%;
         }
         .rack-screw::after {
-            top: 15%; bottom: 15%; left: 50%; width: 1px;
-            transform: translateX(-50%) rotate(45deg);
+            left: 25%; right: 25%; top: 45%; bottom: 45%;
         }
 
-        /* VFDディスプレイスモークガラス枠 */
+        /* 自然なネジの回転のばらつき */
+        .rack-screw-container:nth-child(3n+1) .rack-screw { transform: rotate(15deg); }
+        .rack-screw-container:nth-child(3n+2) .rack-screw { transform: rotate(-45deg); }
+        .rack-screw-container:nth-child(3n+3) .rack-screw { transform: rotate(70deg); }
+        .rack-screw-container.empty .rack-screw { display: none; }
+
+        /* VFDディスプレイスモークガラス枠と段差ベゼル */
         .vfd-bezel {
-            background-color: #020406; /* 基板の奥の暗闇 */
-            border-radius: 4px;
-            border: 3px solid #000;
-            border-bottom-color: #222;
-            border-right-color: #222;
-            box-shadow: inset 0 10px 30px rgba(0,0,0,1), 0 1px 0 rgba(255,255,255,0.1);
+            background-color: #010203; /* 深い緑/青系の黒 */
+            border-radius: 6px;
+            border: 2px solid #000;
+            box-shadow: 
+                inset 0 15px 30px rgba(0,0,0,1), 
+                inset 0 2px 5px rgba(255,255,255,0.05),
+                0 1px 0 rgba(255,255,255,0.15),
+                0 -1px 0 rgba(0,0,0,0.8);
             position: relative;
             overflow: hidden;
+            border-top: 4px solid #111;
+            border-bottom: 4px solid #2a2a2a;
+            border-left: 4px solid #1a1a1a;
+            border-right: 4px solid #222;
         }
 
         /* スモークガラスの反射効果 */
         .glass-overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 45%, rgba(255,255,255,0.02) 100%);
+            background: 
+                linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 30%, rgba(255,255,255,0) 50%, rgba(255,255,255,0.02) 100%),
+                linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 10%, transparent 90%, rgba(0,0,0,0.5) 100%);
             pointer-events: none;
             z-index: 20;
         }
@@ -137,15 +201,17 @@
             z-index: 10;
         }
 
-        /* パネル上のシルクスクリーン印刷風テキスト */
+        /* パネル上のシルクスクリーン印刷風テキスト (インクの立体感) */
         .panel-print {
             color: #d1d5db;
-            text-shadow: 0 1px 1px rgba(0,0,0,0.8);
+            text-shadow: 0px 1px 1px rgba(255,255,255,0.2), 0px -1px 1px rgba(0,0,0,0.8);
             letter-spacing: 0.1em;
+            opacity: 0.9;
         }
         .panel-print-accent {
             color: #00ffcc;
-            text-shadow: 0 0 5px rgba(0,255,204,0.5), 0 1px 1px rgba(0,0,0,0.8);
+            text-shadow: 0 0 4px rgba(0,255,204,0.4), 0 1px 1px rgba(0,0,0,0.8);
+            opacity: 1;
         }
     </style>
 </head>
@@ -155,32 +221,45 @@
 
     <!-- メインコンテンツ (16:9の比率を維持して最大化表示) -->
     <div class="rack-wrapper">
-        <div class="w-full max-h-full aspect-video rack-frame flex flex-col gap-1 relative">
+        <div class="w-full max-h-full aspect-video rack-frame flex flex-col relative">
+            <div class="rack-inner-shadow"></div>
             
             <!-- マスターヘッダーユニット -->
-            <div class="flex-none h-[12%] rack-unit flex items-center px-4 relative z-10">
-                <div class="flex-1">
-                    <div class="text-[1.2vmin] tracking-[0.3em] text-[#00ffcc]/60 mb-0.5">REALTIME TELEMETRY SYSTEM / MASTER NODE</div>
-                    <h1 class="text-[3vmin] font-bold tracking-wider text-[#00ffcc] leading-none" style="text-shadow: 0 0 10px rgba(0,255,204,0.5);">
-                        生徒総会 LIVE MONITOR
-                    </h1>
+            <div class="flex-none h-[12%] rack-unit flex items-center px-0 relative z-10">
+                <!-- 左耳 -->
+                <div class="rack-ear">
+                    <div class="rack-screw-container"><div class="rack-hole-bg"></div><div class="rack-screw"></div></div>
                 </div>
-                <div class="text-right flex flex-col items-end">
-                    <div id="connectionStatus" class="inline-flex items-center gap-2 text-[1.5vmin] font-bold text-rose-500 mb-0.5">
-                        <span class="relative flex h-2 w-2">
-                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                          <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
-                        </span>
-                        CONNECTING...
+
+                <div class="flex-1 flex justify-between items-center px-4 sm:px-6 h-full">
+                    <div>
+                        <div class="panel-print text-[1.2vmin] tracking-[0.3em] text-[#00ffcc] opacity-80 mb-0.5">REALTIME TELEMETRY SYSTEM / MASTER NODE</div>
+                        <h1 class="panel-print-accent text-[3vmin] font-bold tracking-wider leading-none">
+                            生徒総会 LIVE MONITOR
+                        </h1>
                     </div>
-                    <div id="globalStats" class="text-[1.2vmin] font-mono text-[#00ffcc]/80 tracking-widest">
-                        CLASSES: 0/0 (0%) | VOTERS: 0
+                    <div class="text-right flex flex-col items-end">
+                        <div id="connectionStatus" class="inline-flex items-center gap-2 text-[1.5vmin] font-bold text-rose-500 mb-0.5 panel-print-accent">
+                            <span class="relative flex h-2 w-2">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500 shadow-[0_0_5px_#f00]"></span>
+                            </span>
+                            CONNECTING...
+                        </div>
+                        <div id="globalStats" class="text-[1.2vmin] font-mono panel-print tracking-widest text-[#00ffcc]">
+                            CLASSES: 0/0 (0%) | VOTERS: 0
+                        </div>
                     </div>
+                </div>
+
+                <!-- 右耳 -->
+                <div class="rack-ear right">
+                    <div class="rack-screw-container"><div class="rack-hole-bg"></div><div class="rack-screw"></div></div>
                 </div>
             </div>
 
             <!-- 議題ユニット格納コンテナ -->
-            <div class="flex-1 flex flex-col gap-1 relative min-h-0" id="rackContainer">
+            <div class="flex-1 flex flex-col relative min-h-0 py-1" id="rackContainer">
                 <!-- 初期ローディング画面 -->
                 <div id="loadingOverlay" class="absolute inset-0 flex flex-col items-center justify-center bg-[#050505]/90 z-30 rounded-md backdrop-blur-sm">
                     <i class="ph ph-circle-notch animate-spin text-[#00ffcc] mb-4 text-5xl"></i>
@@ -290,7 +369,7 @@
                         ctx.fillRect(barX + yesW, barY, noW, barH);
                     }
 
-                    // 左右の数値表示
+                    // 左右の数値表示 (太字を解除して文字の潰れを防止)
                     const fontSizeNum = Math.max(14, Math.min(32, lh * 0.6));
                     ctx.font = `${fontSizeNum}px "Share Tech Mono", monospace`;
                     ctx.textBaseline = 'middle';
@@ -310,15 +389,12 @@
 
                     if (base > 0) {
                         if (yes > base / 2) {
-                            // 賛成が過半数
                             statusText = "APPROVED";
                             color = this.colors.yes;
                         } else if (no > base / 2) {
-                            // 反対が過半数
                             statusText = "REJECTED";
                             color = this.colors.no;
                         } else if (window.globalTotalClasses > 0 && window.globalCompletedClasses >= window.globalTotalClasses) {
-                            // 全クラスが投票を終えたのに賛成が過半数に届かなかった場合は否決扱い
                             statusText = "REJECTED";
                             color = this.colors.no;
                         }
@@ -370,9 +446,9 @@
                         } else {
                             // 色の簡易判定
                             let c = this.colors.abstain; 
-                            if (g > 150 && b > 150 && r < 100) c = this.colors.yes;       // シアン
-                            else if (r > 150 && g < 100 && b < 150) c = this.colors.no;   // レッド
-                            else if (r > 150 && g > 150 && b < 100) c = this.colors.pending; // イエロー
+                            if (g > 150 && b > 150 && r < 100) c = this.colors.yes;       
+                            else if (r > 150 && g < 100 && b < 150) c = this.colors.no;   
+                            else if (r > 150 && g > 150 && b < 100) c = this.colors.pending; 
 
                             if (paths[c]) paths[c].rect(dx, dy, d, d);
                         }
@@ -411,20 +487,20 @@
             const setConnectionStatus = (isOnline) => {
                 const el = document.getElementById('connectionStatus');
                 if (isOnline) {
-                    el.className = "inline-flex items-center gap-2 text-[1.5vmin] font-bold text-[#00ffcc] mb-0.5";
+                    el.className = "inline-flex items-center gap-2 text-[1.5vmin] font-bold text-[#00ffcc] mb-0.5 panel-print-accent";
                     el.innerHTML = `
                         <span class="relative flex h-2 w-2">
                           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00ffcc] opacity-75"></span>
-                          <span class="relative inline-flex rounded-full h-2 w-2 bg-[#00ffcc]"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-[#00ffcc] shadow-[0_0_5px_#00ffcc]"></span>
                         </span>
                         DATA LINK ACTIVE
                     `;
                 } else {
-                    el.className = "inline-flex items-center gap-2 text-[1.5vmin] font-bold text-rose-500 mb-0.5";
+                    el.className = "inline-flex items-center gap-2 text-[1.5vmin] font-bold text-rose-500 mb-0.5 panel-print";
                     el.innerHTML = `
                         <span class="relative flex h-2 w-2">
                           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                          <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500 shadow-[0_0_5px_#f00]"></span>
                         </span>
                         CONNECTION LOST
                     `;
@@ -486,15 +562,21 @@
                 document.getElementById('loadingOverlay').classList.add('hidden');
 
                 // 議題ごとに独立したラックユニットを生成
-                agendas.forEach(ag => {
+                agendas.forEach((ag, index) => {
                     const numStr = ag.number.toString().padStart(2, '0');
                     const themeStr = ag.theme || 'NO THEME';
                     const div = document.createElement('div');
                     div.className = 'rack-unit';
+                    
+                    // ネジの配置パターン (空き穴とネジをランダムっぽく配置)
+                    const isEven = index % 2 === 0;
+                    
                     div.innerHTML = `
                         <!-- 左耳 -->
                         <div class="rack-ear">
-                            <div class="rack-screw"></div><div class="rack-screw"></div>
+                            <div class="rack-screw-container"><div class="rack-hole-bg"></div><div class="rack-screw"></div></div>
+                            <div class="rack-screw-container empty"><div class="rack-hole-bg"></div><div class="rack-screw"></div></div>
+                            <div class="rack-screw-container ${isEven ? 'empty' : ''}"><div class="rack-hole-bg"></div><div class="rack-screw"></div></div>
                         </div>
                         
                         <!-- ユニットフロントパネル -->
@@ -529,18 +611,18 @@
                         </div>
 
                         <!-- 右耳 -->
-                        <div class="rack-ear">
-                            <div class="rack-screw"></div><div class="rack-screw"></div>
+                        <div class="rack-ear right">
+                            <div class="rack-screw-container ${!isEven ? 'empty' : ''}"><div class="rack-hole-bg"></div><div class="rack-screw"></div></div>
+                            <div class="rack-screw-container empty"><div class="rack-hole-bg"></div><div class="rack-screw"></div></div>
+                            <div class="rack-screw-container"><div class="rack-hole-bg"></div><div class="rack-screw"></div></div>
                         </div>
                     `;
                     container.appendChild(div);
                     
-                    // 1つの議題に対して「メインVFD」「ステータスVFD」の2つのレンダラーを登録
                     renderers.push(new VFDRenderer(`vfd-main-${ag.id}`, ag, 'main'));
                     renderers.push(new VFDRenderer(`vfd-status-${ag.id}`, ag, 'status'));
                 });
 
-                // フォント読み込み完了を待ってからレンダリング開始
                 document.fonts.ready.then(() => {
                     renderLoop();
                 });
@@ -563,7 +645,6 @@
                             if (rMain) rMain.agenda = ag;
                             if (rStatus) rStatus.agenda = ag;
                             
-                            // テーマ名が変更された場合、プリント部分のDOMも更新
                             if (rMain) {
                                 const unitEl = document.getElementById(`vfd-main-${ag.id}`).closest('.rack-unit');
                                 if(unitEl) {
@@ -596,7 +677,8 @@
 
                     const total = votes.length;
                     const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
-                    document.getElementById('globalStats').textContent = `CLASSES: ${completed}/${total} (${pct}%) | VOTERS: ${attended}`;
+                    
+                    document.getElementById('globalStats').innerHTML = `<span class="panel-print text-[#00ffcc]">CLASSES:</span> <span class="panel-print-accent">${completed}/${total} (${pct}%)</span> &nbsp;|&nbsp; <span class="panel-print text-[#00ffcc]">VOTERS:</span> <span class="panel-print-accent">${attended}</span>`;
                 });
             };
 
