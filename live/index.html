@@ -201,7 +201,7 @@
         // VFD ドットマトリクス・レンダリングエンジン
         // ==========================================
         class VFDRenderer {
-            constructor(canvasId, agenda) {
+            constructor(canvasId, agenda, type) {
                 this.canvas = document.getElementById(canvasId);
                 this.ctx = this.canvas.getContext('2d', { alpha: false });
                 
@@ -209,19 +209,20 @@
                 this.offCtx = this.offCanvas.getContext('2d', { willReadFrequently: true });
                 
                 this.agenda = agenda;
+                this.type = type; // 'main' or 'status'
                 
-                // VFDの論理解像度（横に長く、グラフと数値のみを表示）
-                this.logicW = 400; 
+                // VFDの論理解像度 (横に長くするか、短くするか)
+                this.logicW = type === 'main' ? 480 : 140; 
                 this.logicH = 40; // 初期値
                 this.scale = 1;
 
                 this.colors = {
                     bg: '#020406',       
                     offDot: '#001a1a',   
-                    text: '#00e5ff',     
-                    yes: '#00ffff',      // シアン (賛成)
-                    no: '#ff3366',       // ピンク/赤 (反対)
-                    abstain: '#555555',  // グレー (棄権)
+                    yes: '#00ffff',      // シアン (賛成・可決)
+                    no: '#ff3366',       // ピンク/赤 (反対・否決)
+                    abstain: '#555555',  // グレー (棄権・背景)
+                    pending: '#ffcc00'   // 黄色/オレンジ (審議中)
                 };
             }
 
@@ -247,6 +248,7 @@
                 const lw = this.logicW;
                 const lh = this.logicH;
 
+                // 黒(非発光)でクリア
                 ctx.fillStyle = '#000000'; 
                 ctx.fillRect(0, 0, lw, lh);
 
@@ -266,41 +268,69 @@
 
                 const cy = lh / 2; 
 
-                // --- 中央の数直線グラフ ---
-                const barW = lw * 0.4;
-                const barX = (lw - barW) / 2;
-                const barH = Math.max(6, lh * 0.4); 
-                const barY = cy - (barH / 2);
-                
-                ctx.fillStyle = this.colors.abstain; 
-                ctx.fillRect(barX, barY, barW, barH);
+                if (this.type === 'main') {
+                    // --- メインVFD (グラフと数値) ---
+                    const barW = lw * 0.35;
+                    const barX = (lw - barW) / 2;
+                    const barH = Math.max(8, lh * 0.3); 
+                    const barY = cy - (barH / 2);
+                    
+                    ctx.fillStyle = this.colors.abstain; 
+                    ctx.fillRect(barX, barY, barW, barH);
 
-                const yesW = barW * yesPct;
-                if (yesW > 0) {
+                    const yesW = barW * yesPct;
+                    if (yesW > 0) {
+                        ctx.fillStyle = this.colors.yes;
+                        ctx.fillRect(barX, barY, yesW, barH);
+                    }
+
+                    const noW = barW * noPct;
+                    if (noW > 0) {
+                        ctx.fillStyle = this.colors.no;
+                        ctx.fillRect(barX + yesW, barY, noW, barH);
+                    }
+
+                    // 左右の数値表示
+                    const fontSizeNum = Math.max(14, Math.min(32, lh * 0.6));
+                    ctx.font = `bold ${fontSizeNum}px "Share Tech Mono", monospace`;
+                    ctx.textBaseline = 'middle';
+                    
                     ctx.fillStyle = this.colors.yes;
-                    ctx.fillRect(barX, barY, yesW, barH);
-                }
-
-                const noW = barW * noPct;
-                if (noW > 0) {
+                    ctx.textAlign = 'right';
+                    ctx.fillText(`${yes.toString().padStart(3, '0')} (${Math.round(yesPct*100)}%)`, barX - 10, cy);
+                    
                     ctx.fillStyle = this.colors.no;
-                    ctx.fillRect(barX + yesW, barY, noW, barH);
-                }
+                    ctx.textAlign = 'left';
+                    ctx.fillText(`(${Math.round(noPct*100)}%) ${no.toString().padStart(3, '0')}`, barX + barW + 10, cy);
+                
+                } else if (this.type === 'status') {
+                    // --- ステータスVFD (可決/否決/審議中) ---
+                    let statusText = "PENDING";
+                    let color = this.colors.pending;
 
-                // --- 左右の数値表示 ---
-                const fontSizeNum = Math.max(12, Math.min(28, lh * 0.7));
-                ctx.font = `bold ${fontSizeNum}px "Share Tech Mono", monospace`;
-                ctx.textBaseline = 'middle';
-                
-                // 賛成 (左)
-                ctx.fillStyle = this.colors.yes;
-                ctx.textAlign = 'right';
-                ctx.fillText(`${yes.toString().padStart(3, '0')} (${Math.round(yesPct*100)}%)`, barX - 15, cy);
-                
-                // 反対 (右)
-                ctx.fillStyle = this.colors.no;
-                ctx.textAlign = 'left';
-                ctx.fillText(`(${Math.round(noPct*100)}%) ${no.toString().padStart(3, '0')}`, barX + barW + 15, cy);
+                    if (base > 0) {
+                        if (yes > base / 2) {
+                            // 賛成が過半数
+                            statusText = "APPROVED";
+                            color = this.colors.yes;
+                        } else if (no > base / 2) {
+                            // 反対が過半数
+                            statusText = "REJECTED";
+                            color = this.colors.no;
+                        } else if (window.globalTotalClasses > 0 && window.globalCompletedClasses >= window.globalTotalClasses) {
+                            // 全クラスが投票を終えたのに賛成が過半数に届かなかった場合は否決扱い
+                            statusText = "REJECTED";
+                            color = this.colors.no;
+                        }
+                    }
+
+                    const fontSizeStatus = Math.max(12, Math.min(36, lh * 0.7));
+                    ctx.font = `bold ${fontSizeStatus}px "Share Tech Mono", monospace`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = color;
+                    ctx.fillText(statusText, lw / 2, cy);
+                }
             }
 
             render() {
@@ -312,7 +342,9 @@
 
                 const imgData = this.offCtx.getImageData(0, 0, this.logicW, this.logicH).data;
                 const s = this.scale;
-                const d = s > 1 ? s * 0.8 : s; 
+                
+                // スケールに応じてドット間の隙間を計算し、メッシュ感を演出
+                const d = s > 1.5 ? s * 0.8 : s; 
                 const off = (s - d) / 2;
 
                 const paths = {
@@ -320,6 +352,7 @@
                     [this.colors.yes]: new Path2D(),
                     [this.colors.no]: new Path2D(),
                     [this.colors.abstain]: new Path2D(),
+                    [this.colors.pending]: new Path2D()
                 };
 
                 for(let y = 0; y < this.logicH; y++) {
@@ -335,15 +368,18 @@
                         if (r < 10 && g < 10 && b < 10) {
                             paths.off.rect(dx, dy, d, d);
                         } else {
+                            // 色の簡易判定
                             let c = this.colors.abstain; 
-                            if (g > 150 && b > 150 && r < 100) c = this.colors.yes;
-                            else if (r > 150 && g < 100 && b < 150) c = this.colors.no;
+                            if (g > 150 && b > 150 && r < 100) c = this.colors.yes;       // シアン
+                            else if (r > 150 && g < 100 && b < 150) c = this.colors.no;   // レッド
+                            else if (r > 150 && g > 150 && b < 100) c = this.colors.pending; // イエロー
 
                             if (paths[c]) paths[c].rect(dx, dy, d, d);
                         }
                     }
                 }
 
+                // 一括描画
                 this.ctx.fillStyle = this.colors.offDot;
                 this.ctx.fill(paths.off);
 
@@ -361,6 +397,9 @@
         
         window.globalVotes = [];
         window.globalAttended = 0;
+        window.globalTotalClasses = 0;
+        window.globalCompletedClasses = 0;
+        
         let renderers = [];
         let currentAgendaIds = '';
         let animationFrameId = null;
@@ -459,24 +498,30 @@
                         </div>
                         
                         <!-- ユニットフロントパネル -->
-                        <div class="flex-1 flex flex-col justify-center px-4 py-2 relative overflow-hidden">
+                        <div class="flex-1 flex flex-col justify-center px-4 sm:px-6 py-2 sm:py-4 relative overflow-hidden">
                             
-                            <!-- 筐体にプリントされた議題テーマ -->
-                            <div class="panel-print font-bold flex items-center gap-3 mb-1">
-                                <span class="panel-print-accent text-[2.5vmin] leading-none border-l-4 border-[#00ffcc] pl-2">第${numStr}号議案</span>
-                                <span class="text-[2vmin] leading-none truncate">${themeStr}</span>
+                            <!-- 上段: 筐体にプリントされた議題テーマ と ステータスVFD -->
+                            <div class="flex justify-between items-end mb-1 sm:mb-2">
+                                <div class="panel-print font-bold flex items-baseline gap-3 sm:gap-4">
+                                    <span class="panel-print-accent text-[2.5vmin] sm:text-[3.5vmin] leading-none border-l-4 border-[#00ffcc] pl-2">第${numStr}号議案</span>
+                                    <span class="text-[2vmin] sm:text-[2.8vmin] leading-none truncate max-w-[40vw]">${themeStr}</span>
+                                </div>
+                                <div class="vfd-bezel w-[16vw] sm:w-[12vw] h-[4vmin] min-h-[20px] flex-shrink-0 relative">
+                                    <div class="glass-overlay"></div>
+                                    <canvas class="vfd-canvas" id="vfd-status-${ag.id}"></canvas>
+                                </div>
                             </div>
                             
-                            <div class="flex items-center gap-4 flex-1 min-h-0">
-                                <!-- VFDディスプレイとプリントされたラベル -->
-                                <div class="flex-1 flex flex-col h-full justify-center gap-1">
-                                    <div class="flex justify-between panel-print font-bold px-4 tracking-widest text-[1.5vmin]">
+                            <!-- 下段: メインVFDとプリントされたラベル -->
+                            <div class="flex items-center gap-4 flex-1 min-h-0 mt-1 sm:mt-2">
+                                <div class="flex-1 flex flex-col h-full justify-center gap-1 sm:gap-2">
+                                    <div class="flex justify-between panel-print font-bold px-2 sm:px-4 tracking-widest text-[1.5vmin] sm:text-[2vmin]">
                                         <span>&lt;&lt; APPROVE [YES]</span>
                                         <span>REJECT [NO] &gt;&gt;</span>
                                     </div>
-                                    <div class="vfd-bezel w-full flex-1">
+                                    <div class="vfd-bezel w-full flex-1 min-h-[30px]">
                                         <div class="glass-overlay"></div>
-                                        <canvas class="vfd-canvas" id="vfd-${ag.id}"></canvas>
+                                        <canvas class="vfd-canvas" id="vfd-main-${ag.id}"></canvas>
                                     </div>
                                 </div>
                             </div>
@@ -490,7 +535,9 @@
                     `;
                     container.appendChild(div);
                     
-                    renderers.push(new VFDRenderer(`vfd-${ag.id}`, ag));
+                    // 1つの議題に対して「メインVFD」「ステータスVFD」の2つのレンダラーを登録
+                    renderers.push(new VFDRenderer(`vfd-main-${ag.id}`, ag, 'main'));
+                    renderers.push(new VFDRenderer(`vfd-status-${ag.id}`, ag, 'status'));
                 });
 
                 // フォント読み込み完了を待ってからレンダリング開始
@@ -511,11 +558,14 @@
                         rebuildRack(agendas);
                     } else {
                         agendas.forEach(ag => {
-                            const r = renderers.find(rnd => rnd.agenda.id === ag.id);
-                            if (r) {
-                                r.agenda = ag;
-                                // テーマ名が変更された場合、プリント部分のDOMも更新
-                                const unitEl = document.getElementById(`vfd-${ag.id}`).closest('.rack-unit');
+                            const rMain = renderers.find(rnd => rnd.agenda.id === ag.id && rnd.type === 'main');
+                            const rStatus = renderers.find(rnd => rnd.agenda.id === ag.id && rnd.type === 'status');
+                            if (rMain) rMain.agenda = ag;
+                            if (rStatus) rStatus.agenda = ag;
+                            
+                            // テーマ名が変更された場合、プリント部分のDOMも更新
+                            if (rMain) {
+                                const unitEl = document.getElementById(`vfd-main-${ag.id}`).closest('.rack-unit');
                                 if(unitEl) {
                                     const themeSpan = unitEl.querySelector('.panel-print span:nth-child(2)');
                                     if(themeSpan) themeSpan.textContent = ag.theme || 'NO THEME';
@@ -541,6 +591,8 @@
                     
                     window.globalVotes = votes;
                     window.globalAttended = attended;
+                    window.globalTotalClasses = votes.length;
+                    window.globalCompletedClasses = completed;
 
                     const total = votes.length;
                     const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
