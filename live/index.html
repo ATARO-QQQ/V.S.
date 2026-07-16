@@ -9,7 +9,7 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
         body {
-            background-color: #030507; /* 暗い部屋の背景 */
+            background-color: #030507;
             font-family: 'Share Tech Mono', 'M PLUS 1p', sans-serif;
             overflow: hidden; /* スクロール完全無効化 */
             margin: 0;
@@ -28,6 +28,17 @@
             z-index: -2;
         }
 
+        /* 16:9アスペクト比を維持しつつ最大化するラッパー */
+        .rack-wrapper {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2vmin;
+            box-sizing: border-box;
+        }
+
         /* ラックマウントのフレーム構造 */
         .rack-frame {
             background-color: #0a0a0a;
@@ -42,7 +53,7 @@
         /* サーバーラックユニット本体の金属・ヘアライン質感 */
         .rack-unit {
             flex: 1;
-            min-height: 0; /* 重要: Flexbox内で溢れるのを防ぐ */
+            min-height: 0; /* Flexbox内で溢れるのを防ぐ */
             background-color: #2b2b2b;
             background-image: 
                 linear-gradient(to bottom, #4a4a4a 0%, #2b2b2b 15%, #1a1a1a 100%),
@@ -97,7 +108,6 @@
 
         /* VFDディスプレイスモークガラス枠 */
         .vfd-bezel {
-            flex: 1;
             background-color: #020406; /* 基板の奥の暗闇 */
             border-radius: 4px;
             border: 3px solid #000;
@@ -106,7 +116,6 @@
             box-shadow: inset 0 10px 30px rgba(0,0,0,1), 0 1px 0 rgba(255,255,255,0.1);
             position: relative;
             overflow: hidden;
-            margin: 4px;
         }
 
         /* スモークガラスの反射効果 */
@@ -127,49 +136,61 @@
             position: relative;
             z-index: 10;
         }
+
+        /* パネル上のシルクスクリーン印刷風テキスト */
+        .panel-print {
+            color: #d1d5db;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.8);
+            letter-spacing: 0.1em;
+        }
+        .panel-print-accent {
+            color: #00ffcc;
+            text-shadow: 0 0 5px rgba(0,255,204,0.5), 0 1px 1px rgba(0,0,0,0.8);
+        }
     </style>
 </head>
-<body class="w-screen h-screen flex flex-col p-4 box-border">
+<body>
 
     <div class="cyber-bg"></div>
 
-    <!-- ヘッダー情報 -->
-    <header class="flex-none h-16 flex justify-between items-end border-b border-[#00ffcc]/30 pb-2 relative z-10 mb-4">
-        <div>
-            <div class="text-[10px] tracking-[0.3em] text-[#00ffcc]/60 mb-1">REALTIME TELEMETRY</div>
-            <h1 class="text-2xl sm:text-3xl font-bold tracking-wider text-[#00ffcc]" style="text-shadow: 0 0 10px rgba(0,255,204,0.5);">
-                生徒総会 LIVE MONITOR
-            </h1>
-        </div>
-        <div class="text-right flex flex-col items-end">
-            <div id="connectionStatus" class="inline-flex items-center gap-2 text-xs font-bold text-rose-500 mb-1">
-                <span class="relative flex h-2 w-2">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
-                </span>
-                CONNECTING...
-            </div>
-            <div id="globalStats" class="text-[10px] sm:text-xs font-mono text-[#00ffcc]/80 tracking-widest">
-                CLASSES: 0/0 (0%) | VOTERS: 0
-            </div>
-        </div>
-    </header>
-
     <!-- メインコンテンツ (16:9の比率を維持して最大化表示) -->
-    <main class="flex-1 min-h-0 flex items-center justify-center relative z-10">
-        <!-- アスペクト比16:9を強制するラッパー -->
-        <div class="w-full max-h-full aspect-video rack-frame flex flex-col gap-1 relative" id="rackContainer">
+    <div class="rack-wrapper">
+        <div class="w-full max-h-full aspect-video rack-frame flex flex-col gap-1 relative">
             
-            <!-- 初期ローディング画面 -->
-            <div id="loadingOverlay" class="absolute inset-0 flex flex-col items-center justify-center bg-[#050505]/90 z-30 rounded-lg backdrop-blur-sm">
-                <i class="ph ph-circle-notch animate-spin text-[#00ffcc] mb-4 text-5xl"></i>
-                <div class="tracking-widest animate-pulse font-bold text-[#00ffcc] text-lg">WAITING FOR DATA SIGNAL...</div>
+            <!-- マスターヘッダーユニット -->
+            <div class="flex-none h-[12%] rack-unit flex items-center px-4 relative z-10">
+                <div class="flex-1">
+                    <div class="text-[1.2vmin] tracking-[0.3em] text-[#00ffcc]/60 mb-0.5">REALTIME TELEMETRY SYSTEM / MASTER NODE</div>
+                    <h1 class="text-[3vmin] font-bold tracking-wider text-[#00ffcc] leading-none" style="text-shadow: 0 0 10px rgba(0,255,204,0.5);">
+                        生徒総会 LIVE MONITOR
+                    </h1>
+                </div>
+                <div class="text-right flex flex-col items-end">
+                    <div id="connectionStatus" class="inline-flex items-center gap-2 text-[1.5vmin] font-bold text-rose-500 mb-0.5">
+                        <span class="relative flex h-2 w-2">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                        </span>
+                        CONNECTING...
+                    </div>
+                    <div id="globalStats" class="text-[1.2vmin] font-mono text-[#00ffcc]/80 tracking-widest">
+                        CLASSES: 0/0 (0%) | VOTERS: 0
+                    </div>
+                </div>
             </div>
 
-            <!-- 動的にrack-unitがここに追加されます -->
+            <!-- 議題ユニット格納コンテナ -->
+            <div class="flex-1 flex flex-col gap-1 relative min-h-0" id="rackContainer">
+                <!-- 初期ローディング画面 -->
+                <div id="loadingOverlay" class="absolute inset-0 flex flex-col items-center justify-center bg-[#050505]/90 z-30 rounded-md backdrop-blur-sm">
+                    <i class="ph ph-circle-notch animate-spin text-[#00ffcc] mb-4 text-5xl"></i>
+                    <div class="tracking-widest animate-pulse font-bold text-[#00ffcc] text-[2vmin]">WAITING FOR DATA SIGNAL...</div>
+                </div>
+                <!-- 動的にrack-unitがここに追加されます -->
+            </div>
 
         </div>
-    </main>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -189,31 +210,31 @@
                 
                 this.agenda = agenda;
                 
-                this.logicW = 400; // 横幅の論理ドット数は固定
-                this.logicH = 100; // 初期値。後でアスペクト比から自動計算
+                // VFDの論理解像度（横に長く、グラフと数値のみを表示）
+                this.logicW = 400; 
+                this.logicH = 40; // 初期値
                 this.scale = 1;
 
                 this.colors = {
-                    bg: '#020406',       // ガラスの奥の闇
-                    offDot: '#001a1a',   // 光っていないドット
-                    text: '#00e5ff',     // 通常テキスト (VFDシアン)
-                    yes: '#00ffff',      // 賛成バー (明るいシアン)
-                    no: '#ff3366',       // 反対バー (ピンク/赤)
-                    abstain: '#555555',  // 棄権バー (グレー)
-                    highlight: '#ffffff' // ハイライト
+                    bg: '#020406',       
+                    offDot: '#001a1a',   
+                    text: '#00e5ff',     
+                    yes: '#00ffff',      // シアン (賛成)
+                    no: '#ff3366',       // ピンク/赤 (反対)
+                    abstain: '#555555',  // グレー (棄権)
                 };
             }
 
-            // コンテナのサイズに合わせてCanvas解像度とドットサイズを自動計算
             updateSize() {
                 const parent = this.canvas.parentElement;
                 if (!parent) return;
                 const rect = parent.getBoundingClientRect();
                 if (rect.width === 0 || rect.height === 0) return;
 
-                // 横幅を基準にスケールを決定 (浮動小数点でピッタリフィット)
-                this.scale = rect.width / this.logicW;
-                this.logicH = Math.max(1, Math.floor(rect.height / this.scale));
+                // 横幅に合わせてドットサイズ(スケール)を決定
+                this.scale = Math.max(1, rect.width / this.logicW);
+                // 高さに合わせて論理縦ドット数を決定
+                this.logicH = Math.max(10, Math.floor(rect.height / this.scale));
 
                 this.canvas.width = rect.width;
                 this.canvas.height = rect.height;
@@ -221,19 +242,16 @@
                 this.offCanvas.height = this.logicH;
             }
 
-            // オフスクリーンCanvasにグラフや文字などの論理構造を描画
             drawLogic() {
                 const ctx = this.offCtx;
                 const lw = this.logicW;
                 const lh = this.logicH;
 
-                // 黒(非発光)でクリア
                 ctx.fillStyle = '#000000'; 
                 ctx.fillRect(0, 0, lw, lh);
 
                 if (!this.agenda) return;
 
-                // データ集計
                 let yes = 0, no = 0;
                 window.globalVotes.forEach(v => {
                     if (v.step === 2 && v[`agenda${this.agenda.number}`]) {
@@ -243,26 +261,15 @@
                 });
                 
                 const base = window.globalAttended;
-                const abstain = Math.max(0, base - (yes + no));
                 const yesPct = base > 0 ? (yes / base) : 0;
                 const noPct = base > 0 ? (no / base) : 0;
 
-                // 描画領域の高さを基準に文字サイズなどをレスポンシブに相対計算
-                const cy = lh / 2; // Y軸の中央
-                const fontSizeTheme = Math.max(12, Math.min(24, lh * 0.25));
-                const fontSizeNum = Math.max(10, Math.min(18, lh * 0.2));
+                const cy = lh / 2; 
 
-                // タイトル描画
-                ctx.font = `bold ${fontSizeTheme}px "M PLUS 1p", sans-serif`;
-                ctx.fillStyle = this.colors.highlight;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(`第${this.agenda.number}号 : ${this.agenda.theme || 'NO THEME'}`, lw / 2, cy - (lh * 0.22));
-
-                // グラフバー計算
-                const barW = lw * 0.8;
+                // --- 中央の数直線グラフ ---
+                const barW = lw * 0.4;
                 const barX = (lw - barW) / 2;
-                const barH = Math.max(4, lh * 0.15);
+                const barH = Math.max(6, lh * 0.4); 
                 const barY = cy - (barH / 2);
                 
                 ctx.fillStyle = this.colors.abstain; 
@@ -280,41 +287,39 @@
                     ctx.fillRect(barX + yesW, barY, noW, barH);
                 }
 
-                // 数値描画
+                // --- 左右の数値表示 ---
+                const fontSizeNum = Math.max(12, Math.min(28, lh * 0.7));
                 ctx.font = `bold ${fontSizeNum}px "Share Tech Mono", monospace`;
+                ctx.textBaseline = 'middle';
                 
+                // 賛成 (左)
                 ctx.fillStyle = this.colors.yes;
-                ctx.textAlign = 'left';
-                ctx.fillText(`YES:${yes.toString().padStart(3, '0')} (${Math.round(yesPct*100)}%)`, barX, cy + (lh * 0.25));
-                
-                ctx.fillStyle = this.colors.no;
                 ctx.textAlign = 'right';
-                ctx.fillText(`NO:${no.toString().padStart(3, '0')} (${Math.round(noPct*100)}%)`, barX + barW, cy + (lh * 0.25));
+                ctx.fillText(`${yes.toString().padStart(3, '0')} (${Math.round(yesPct*100)}%)`, barX - 15, cy);
+                
+                // 反対 (右)
+                ctx.fillStyle = this.colors.no;
+                ctx.textAlign = 'left';
+                ctx.fillText(`(${Math.round(noPct*100)}%) ${no.toString().padStart(3, '0')}`, barX + barW + 15, cy);
             }
 
-            // ピクセルサンプリングしてドットマトリクスを描画
             render() {
                 this.updateSize();
                 this.drawLogic();
 
-                // メインキャンバスをクリア
                 this.ctx.fillStyle = this.colors.bg;
                 this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
                 const imgData = this.offCtx.getImageData(0, 0, this.logicW, this.logicH).data;
                 const s = this.scale;
-                
-                // ドット間の隙間(メッシュ感)を作るため、実際の描画サイズを少し小さくする
                 const d = s > 1 ? s * 0.8 : s; 
                 const off = (s - d) / 2;
 
                 const paths = {
                     off: new Path2D(),
-                    [this.colors.text]: new Path2D(),
                     [this.colors.yes]: new Path2D(),
                     [this.colors.no]: new Path2D(),
                     [this.colors.abstain]: new Path2D(),
-                    [this.colors.highlight]: new Path2D()
                 };
 
                 for(let y = 0; y < this.logicH; y++) {
@@ -330,19 +335,15 @@
                         if (r < 10 && g < 10 && b < 10) {
                             paths.off.rect(dx, dy, d, d);
                         } else {
-                            let c = this.colors.text; 
-                            if (r > 200 && g > 200 && b > 200) c = this.colors.highlight;
-                            else if (r < 50 && g > 200 && b > 200) c = this.colors.yes;
-                            else if (r > 200 && g < 100 && b < 150) c = this.colors.no;
-                            else if (r > 80 && r < 120 && g > 80 && g < 120) c = this.colors.abstain;
+                            let c = this.colors.abstain; 
+                            if (g > 150 && b > 150 && r < 100) c = this.colors.yes;
+                            else if (r > 150 && g < 100 && b < 150) c = this.colors.no;
 
                             if (paths[c]) paths[c].rect(dx, dy, d, d);
-                            else paths[this.colors.text].rect(dx, dy, d, d);
                         }
                     }
                 }
 
-                // 一括描画 (高速化)
                 this.ctx.fillStyle = this.colors.offDot;
                 this.ctx.fill(paths.off);
 
@@ -371,7 +372,7 @@
             const setConnectionStatus = (isOnline) => {
                 const el = document.getElementById('connectionStatus');
                 if (isOnline) {
-                    el.className = "inline-flex items-center gap-2 text-xs font-bold text-[#00ffcc] mb-1";
+                    el.className = "inline-flex items-center gap-2 text-[1.5vmin] font-bold text-[#00ffcc] mb-0.5";
                     el.innerHTML = `
                         <span class="relative flex h-2 w-2">
                           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00ffcc] opacity-75"></span>
@@ -380,7 +381,7 @@
                         DATA LINK ACTIVE
                     `;
                 } else {
-                    el.className = "inline-flex items-center gap-2 text-xs font-bold text-rose-500 mb-1";
+                    el.className = "inline-flex items-center gap-2 text-[1.5vmin] font-bold text-rose-500 mb-0.5";
                     el.innerHTML = `
                         <span class="relative flex h-2 w-2">
                           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
@@ -415,33 +416,29 @@
                     console.error("Firebase Init Error:", error);
                     setConnectionStatus(false);
                     document.getElementById('loadingOverlay').innerHTML = `
-                        <i class="ph ph-warning-circle text-5xl mb-4 text-rose-500"></i>
-                        <div class="tracking-widest font-bold text-lg text-rose-500">SYSTEM FAILURE.</div>
+                        <i class="ph ph-warning-circle text-[5vmin] mb-4 text-rose-500"></i>
+                        <div class="tracking-widest font-bold text-[2vmin] text-rose-500">SYSTEM FAILURE.</div>
                     `;
                 }
             };
 
-            // 毎フレームすべてを描画するループ
             const renderLoop = () => {
                 renderers.forEach(r => r.render());
                 animationFrameId = requestAnimationFrame(renderLoop);
             };
 
-            // 議題の数に合わせて筐体（HTML要素）を動的生成
             const rebuildRack = (agendas) => {
                 if (animationFrameId) cancelAnimationFrame(animationFrameId);
                 renderers = [];
                 
                 const container = document.getElementById('rackContainer');
-                
-                // loadingOverlay以外の要素をクリア
                 Array.from(container.children).forEach(child => {
                     if (child.id !== 'loadingOverlay') container.removeChild(child);
                 });
 
                 if(agendas.length === 0) {
                     document.getElementById('loadingOverlay').innerHTML = `
-                        <div class="tracking-widest animate-pulse font-bold text-[#00ffcc] text-lg">NO AGENDAS DETECTED.</div>
+                        <div class="tracking-widest animate-pulse font-bold text-[#00ffcc] text-[2vmin]">NO AGENDAS DETECTED.</div>
                     `;
                     document.getElementById('loadingOverlay').classList.remove('hidden');
                     return;
@@ -452,6 +449,7 @@
                 // 議題ごとに独立したラックユニットを生成
                 agendas.forEach(ag => {
                     const numStr = ag.number.toString().padStart(2, '0');
+                    const themeStr = ag.theme || 'NO THEME';
                     const div = document.createElement('div');
                     div.className = 'rack-unit';
                     div.innerHTML = `
@@ -461,19 +459,28 @@
                         </div>
                         
                         <!-- ユニットフロントパネル -->
-                        <div class="flex-1 flex items-center p-1 sm:p-2 gap-2 sm:gap-4 relative overflow-hidden">
-                            <!-- パネル左のインジケーター -->
-                            <div class="flex flex-col items-center justify-center w-8 sm:w-12 h-full border-r border-[#111] pr-2 shadow-[2px_0_2px_rgba(255,255,255,0.02)]">
-                                <div class="text-[8px] font-bold text-gray-500 mb-1">UNIT</div>
-                                <div class="text-lg sm:text-xl font-bold text-gray-300 font-mono leading-none">${numStr}</div>
-                                <div class="w-2 h-2 mt-2 rounded-full bg-green-500 shadow-[0_0_8px_#0f0]"></div>
+                        <div class="flex-1 flex flex-col justify-center px-4 py-2 relative overflow-hidden">
+                            
+                            <!-- 筐体にプリントされた議題テーマ -->
+                            <div class="panel-print font-bold flex items-center gap-3 mb-1">
+                                <span class="panel-print-accent text-[2.5vmin] leading-none border-l-4 border-[#00ffcc] pl-2">第${numStr}号議案</span>
+                                <span class="text-[2vmin] leading-none truncate">${themeStr}</span>
                             </div>
                             
-                            <!-- VFDディスプレイ領域 -->
-                            <div class="vfd-bezel h-full">
-                                <div class="glass-overlay"></div>
-                                <canvas class="vfd-canvas" id="vfd-${ag.id}"></canvas>
+                            <div class="flex items-center gap-4 flex-1 min-h-0">
+                                <!-- VFDディスプレイとプリントされたラベル -->
+                                <div class="flex-1 flex flex-col h-full justify-center gap-1">
+                                    <div class="flex justify-between panel-print font-bold px-4 tracking-widest text-[1.5vmin]">
+                                        <span>&lt;&lt; APPROVE [YES]</span>
+                                        <span>REJECT [NO] &gt;&gt;</span>
+                                    </div>
+                                    <div class="vfd-bezel w-full flex-1">
+                                        <div class="glass-overlay"></div>
+                                        <canvas class="vfd-canvas" id="vfd-${ag.id}"></canvas>
+                                    </div>
+                                </div>
                             </div>
+
                         </div>
 
                         <!-- 右耳 -->
@@ -483,35 +490,41 @@
                     `;
                     container.appendChild(div);
                     
-                    // 各Canvasに対応するレンダラーを生成
                     renderers.push(new VFDRenderer(`vfd-${ag.id}`, ag));
                 });
 
-                renderLoop();
+                // フォント読み込み完了を待ってからレンダリング開始
+                document.fonts.ready.then(() => {
+                    renderLoop();
+                });
             };
 
             const startDataSync = () => {
-                // 議題データの監視
                 onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'agendas'), (snap) => {
                     let agendas = [];
                     snap.forEach(d => agendas.push({ id: d.id, ...d.data() }));
                     agendas.sort((a, b) => (a.number || 0) - (b.number || 0));
                     
-                    // 議題の増減やID変更があればDOMを再構築
                     const newIds = agendas.map(a => a.id).join(',');
                     if (currentAgendaIds !== newIds) {
                         currentAgendaIds = newIds;
                         rebuildRack(agendas);
                     } else {
-                        // 変更がなければ、テーマ名などの更新だけ各レンダラーに反映
                         agendas.forEach(ag => {
                             const r = renderers.find(rnd => rnd.agenda.id === ag.id);
-                            if (r) r.agenda = ag;
+                            if (r) {
+                                r.agenda = ag;
+                                // テーマ名が変更された場合、プリント部分のDOMも更新
+                                const unitEl = document.getElementById(`vfd-${ag.id}`).closest('.rack-unit');
+                                if(unitEl) {
+                                    const themeSpan = unitEl.querySelector('.panel-print span:nth-child(2)');
+                                    if(themeSpan) themeSpan.textContent = ag.theme || 'NO THEME';
+                                }
+                            }
                         });
                     }
                 });
 
-                // 投票データの監視
                 onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'votes'), (snap) => {
                     let votes = [];
                     let completed = 0;
@@ -526,11 +539,9 @@
                         }
                     });
                     
-                    // グローバル変数にセット (各レンダラーが毎フレーム参照する)
                     window.globalVotes = votes;
                     window.globalAttended = attended;
 
-                    // ヘッダーの全体進捗ステータスを更新
                     const total = votes.length;
                     const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
                     document.getElementById('globalStats').textContent = `CLASSES: ${completed}/${total} (${pct}%) | VOTERS: ${attended}`;
