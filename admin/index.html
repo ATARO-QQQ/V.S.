@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生徒会システム 統合管理コンソール</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=MS+PGothic&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        body {
+            font-family: 'MS PGothic', 'ＭＳ Ｐゴシック', sans-serif;
+            background-color: #008080; /* Win95 Desktop Color */
+            /* antialiasing off for retro feel */
+            -webkit-font-smoothing: none;
+        }
+
+        /* 90年代風 UI コンポーネント */
+        .win-outset {
+            background-color: #c0c0c0;
+            border-top: 2px solid #ffffff;
+            border-left: 2px solid #ffffff;
+            border-right: 2px solid #000000;
+            border-bottom: 2px solid #000000;
+            box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #dfdfdf;
+        }
+
+        .win-inset {
+            background-color: #ffffff;
+            border-top: 2px solid #808080;
+            border-left: 2px solid #808080;
+            border-right: 2px solid #ffffff;
+            border-bottom: 2px solid #ffffff;
+            box-shadow: inset 1px 1px 0 #000000, inset -1px -1px 0 #dfdfdf;
+        }
+
+        .win-btn {
+            background-color: #c0c0c0;
+            border-top: 2px solid #ffffff;
+            border-left: 2px solid #ffffff;
+            border-right: 2px solid #000000;
+            border-bottom: 2px solid #000000;
+            box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #dfdfdf;
+            cursor: pointer;
+        }
+        
+        .win-btn:active {
+            border-top: 2px solid #000000;
+            border-left: 2px solid #000000;
+            border-right: 2px solid #ffffff;
+            border-bottom: 2px solid #ffffff;
+            box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #dfdfdf;
+            padding-top: 2px;
+            padding-left: 2px;
+        }
+
+        .win-btn:disabled {
+            color: #808080;
+            text-shadow: 1px 1px 0 #ffffff;
+            cursor: not-allowed;
+        }
+
+        .win-titlebar {
+            background: linear-gradient(90deg, #000080, #1084d0);
+            color: white;
+            font-weight: bold;
+            padding: 2px 4px;
+            font-size: 12px;
+        }
+
+        .list-item {
+            cursor: pointer;
+            padding: 2px 4px;
+        }
+
+        .list-item:hover {
+            background-color: #dfdfdf;
+        }
+
+        .list-item.selected {
+            background-color: #000080;
+            color: #ffffff;
+        }
+
+        .dither-overlay {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="2" height="2"><rect width="1" height="1" fill="black"/><rect x="1" y="1" width="1" height="1" fill="black"/></svg>');
+            background-repeat: repeat;
+        }
+
+        .tab-btn.active-tab {
+            background-color: #c0c0c0;
+            border-top: 2px solid #808080;
+            border-left: 2px solid #808080;
+            border-right: 2px solid #ffffff;
+            border-bottom: 2px solid #ffffff;
+            box-shadow: inset 1px 1px 0 #000000, inset -1px -1px 0 #dfdfdf;
+            color: #808080;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="p-4 min-h-screen text-black overflow-x-hidden">
+
+    <div id="loginOverlay" class="fixed inset-0 z-[100] flex items-center justify-center dither-overlay">
+        <div class="win-outset w-[340px] shadow-[2px_2px_10px_rgba(0,0,0,0.5)] bg-[#c0c0c0]">
+            <div class="win-titlebar flex justify-between items-center">
+                <span>システム ログイン</span>
+                <button class="win-btn w-4 h-4 flex items-center justify-center" disabled>
+                    <svg width="6" height="6" viewBox="0 0 6 6" fill="none" xmlns="http://www.w3.org/2000/svg" class="align-middle opacity-50">
+                        <path d="M0.5 0.5L5.5 5.5M5.5 0.5L0.5 5.5" stroke="black" stroke-width="1.5"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-5 text-black">
+                <div class="flex gap-4 mb-4 items-center">
+                    <i class="ph-fill ph-lock-key text-[40px] text-[#000080]"></i>
+                    <div class="text-[12px] font-bold">
+                        システム設定にアクセスするには<br>
+                        管理者用IDとパスワードを入力してください。
+                    </div>
+                </div>
+                <table class="w-full text-[12px] font-bold">
+                    <tr>
+                        <td class="pb-3 w-[80px]">ユーザーID:</td>
+                        <td class="pb-3"><input type="text" id="loginUserId" class="win-inset w-full p-1 bg-white text-black font-mono"></td>
+                    </tr>
+                    <tr>
+                        <td class="pb-1">パスワード:</td>
+                        <td class="pb-1"><input type="password" id="loginPassword" class="win-inset w-full p-1 bg-white text-black font-mono"></td>
+                    </tr>
+                </table>
+                <div id="loginErrorMsg" class="text-[#ff0000] text-[11px] h-4 mt-1 font-bold text-center"></div>
+                <div id="loadingMsg" class="text-[#000080] text-[11px] h-4 mt-1 font-bold text-center hidden">
+                    <i class="ph ph-spinner animate-spin"></i> データベースを確認中...
+                </div>
+            </div>
+            <div class="p-2 bg-[#c0c0c0] border-t border-[#808080] flex justify-end gap-2">
+                <button id="btnLoginSubmit" class="win-btn px-6 py-1 focus:outline-none font-bold">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainContent" class="w-full max-w-[1000px] mx-auto space-y-4 hidden">
+        
+        <header class="win-outset flex items-center justify-between p-1.5 mb-2">
+            <div class="flex items-center gap-2 font-bold text-sm bg-[#000080] text-white px-3 py-1 border border-[#ffffff] shadow-[inset_1px_1px_0_#000000]">
+                <i class="ph-fill ph-monitor"></i> 統合管理コンソール [v1.0]
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="flex gap-1">
+                    <button class="tab-btn active-tab px-2 py-0.5 font-bold flex items-center gap-1 text-xs" data-target="viewer">
+                        <i class="ph ph-chart-bar"></i> ビューアー
+                    </button>
+                    <button class="tab-btn win-btn px-2 py-0.5 font-bold flex items-center gap-1 text-xs hover:bg-[#ffffff]" data-target="editor">
+                        <i class="ph ph-pencil"></i> データエディタ
+                    </button>
+                    <button class="tab-btn win-btn px-2 py-0.5 font-bold flex items-center gap-1 text-xs hover:bg-[#ffffff]" data-target="agendas">
+                        <i class="ph ph-list-numbers"></i> 議題管理
+                    </button>
+                    <button class="tab-btn win-btn px-2 py-0.5 font-bold flex items-center gap-1 text-xs hover:bg-[#ffffff]" data-target="accounts">
+                        <i class="ph ph-users"></i> アカウント管理
+                    </button>
+                </div>
+                
+                <div class="flex items-center gap-2 text-black font-mono text-xs pr-2">
+                    <span id="currentUserDisplay" class="bg-[#ffffff] px-2 py-0.5 border border-[#808080] shadow-[inset_1px_1px_0_#000000]"></span>
+                    <button id="btnLogout" class="win-btn px-2 py-0.5 font-bold flex items-center gap-1 hover:bg-[#ffffff] text-xs">
+                        <i class="ph ph-sign-out"></i> ログアウト
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-2 text-black font-mono text-xs pr-2" id="systemClock">
+                    0000-00-00 00:00:00 JST
+                </div>
+            </div>
+        </header>
+
+        <div id="statusAlert" class="win-outset p-2 hidden flex items-start gap-2 bg-[#ffff00] border-l-4 border-[#808000]">
+            <i class="ph-fill ph-warning-circle text-[16px] mt-0.5"></i>
+            <div class="text-[12px] font-bold font-mono" id="alertMessage"></div>
+        </div>
+
+        <div id="tab-viewer" class="tab-content block space-y-4">
+            <div class="win-outset bg-[#c0c0c0] p-4">
+                <div class="win-titlebar mb-3 flex items-center gap-2">
+                    <i class="ph-fill ph-presentation-chart"></i> リアルタイム集計状況
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-4 text-sm font-bold">
+                    <div class="win-inset bg-white p-3 flex justify-between items-center">
+                        <span>報告完了クラス数:</span>
+                        <span id="viewerClassCount" class="text-blue-700 text-lg">0</span>
+                    </div>
+                    <div class="win-inset bg-white p-3 flex justify-between items-center">
+                        <span>総投票数 (賛成+反対):</span>
+                        <span id="viewerTotalVotes" class="text-green-700 text-lg">0</span>
+                    </div>
+                </div>
+                <div id="viewerChartsContainer" class="space-y-6">
+                    <div class="text-center text-sm font-bold text-gray-600">集計データを読み込んでいます...</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-editor" class="tab-content hidden grid grid-cols-[250px_1fr] gap-4">
+            <div class="win-outset bg-[#c0c0c0] flex flex-col h-[500px]">
+                <div class="win-titlebar">報告データ一覧</div>
+                <div class="p-1 flex-1 overflow-hidden flex flex-col">
+                    <div class="win-inset bg-[#ffffff] flex-1 overflow-y-auto">
+                        <ul id="editorDataList" class="text-[12px] font-mono"></ul>
+                    </div>
+                    <div class="mt-1 text-[11px] font-mono">
+                        総数: <span id="editorTotalCount">0</span>件
+                    </div>
+                </div>
+            </div>
+            <div class="win-outset bg-[#c0c0c0] flex flex-col h-[500px]">
+                <div class="win-titlebar">レコード詳細編集</div>
+                <div class="p-4 flex-1 overflow-y-auto text-[12px] font-bold bg-[#c0c0c0]">
+                    <div id="editorEmptyState" class="h-full flex items-center justify-center text-[#808080]">
+                        左のリストからデータを選択してください
+                    </div>
+                    <div id="editorFormContainer" class="hidden space-y-4">
+                        <table class="w-full">
+                            <tr>
+                                <td class="w-[100px] pb-2">クラス名:</td>
+                                <td class="pb-2"><input type="text" id="editClassName" class="win-inset w-full p-1 bg-white font-mono"></td>
+                            </tr>
+                            <tr>
+                                <td class="pb-2">在籍人数:</td>
+                                <td class="pb-2"><input type="number" id="editTotalStudents" class="win-inset w-full p-1 bg-white font-mono"></td>
+                            </tr>
+                            <tr>
+                                <td class="pb-2">出席人数:</td>
+                                <td class="pb-2"><input type="number" id="editAttendedStudents" class="win-inset w-full p-1 bg-white font-mono"></td>
+                            </tr>
+                        </table>
+                        <div class="border-t border-[#808080] pt-4">
+                            <div class="mb-2">各議題の投票結果:</div>
+                            <div id="editorAgendasContainer" class="space-y-2"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-2 bg-[#c0c0c0] border-t border-[#808080] flex justify-between items-center">
+                    <button id="btnDeleteEditor" class="win-btn px-4 py-1 text-[#ff0000] font-bold" disabled>削除</button>
+                    <button id="btnSaveEditor" class="win-btn px-6 py-1 font-bold" disabled>保存</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-agendas" class="tab-content hidden grid grid-cols-[250px_1fr] gap-4">
+            <div class="win-outset bg-[#c0c0c0] flex flex-col h-[500px]">
+                <div class="win-titlebar">登録済み議題一覧</div>
+                <div class="p-1 flex-1 overflow-hidden flex flex-col">
+                    <div class="win-inset bg-[#ffffff] flex-1 overflow-y-auto">
+                        <ul id="agendaList" class="text-[12px] font-mono"></ul>
+                    </div>
+                    <button id="btnNewAgenda" class="win-btn w-full mt-2 py-1 font-bold text-[12px]">＋ 新規議題を追加</button>
+                </div>
+            </div>
+            <div class="win-outset bg-[#c0c0c0] flex flex-col h-[500px]">
+                <div class="win-titlebar">議題詳細編集</div>
+                <div class="p-4 flex-1 overflow-y-auto text-[12px] font-bold">
+                    <div id="agendaEmptyState" class="h-full flex items-center justify-center text-[#808080]">
+                        左のリストから選択するか、新規作成してください
+                    </div>
+                    <div id="agendaFormContainer" class="hidden space-y-4">
+                        <table class="w-full">
+                            <tr>
+                                <td class="w-[80px] pb-2">号案番号:</td>
+                                <td class="pb-2"><input type="number" id="agendaNumber" class="win-inset w-[80px] p-1 bg-white font-mono"> 号</td>
+                            </tr>
+                            <tr>
+                                <td class="pb-2">テーマ:</td>
+                                <td class="pb-2"><input type="text" id="agendaTheme" class="win-inset w-full p-1 bg-white font-mono"></td>
+                            </tr>
+                            <tr>
+                                <td class="pb-2 align-top pt-1">詳細:</td>
+                                <td class="pb-2"><textarea id="agendaDetails" class="win-inset w-full p-1 bg-white font-mono h-24"></textarea></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="p-2 bg-[#c0c0c0] border-t border-[#808080] flex justify-between items-center">
+                    <button id="btnDeleteAgenda" class="win-btn px-4 py-1 text-[#ff0000] font-bold hidden">削除</button>
+                    <div class="flex-1"></div>
+                    <button id="btnSaveAgenda" class="win-btn px-6 py-1 font-bold hidden">保存</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-accounts" class="tab-content hidden grid grid-cols-[250px_1fr] gap-4">
+            <div class="win-outset bg-[#c0c0c0] flex flex-col h-[500px]">
+                <div class="win-titlebar">アカウント一覧</div>
+                <div class="p-1 flex-1 overflow-hidden flex flex-col">
+                    <div class="win-inset bg-[#ffffff] flex-1 overflow-y-auto">
+                        <ul id="accountList" class="text-[12px] font-mono"></ul>
+                    </div>
+                    <button id="btnNewAccount" class="win-btn w-full mt-2 py-1 font-bold text-[12px]">＋ 新規アカウント</button>
+                </div>
+            </div>
+            <div class="win-outset bg-[#c0c0c0] flex flex-col h-[500px]">
+                <div class="win-titlebar">アカウント詳細</div>
+                <div class="p-4 flex-1 text-[12px] font-bold">
+                    <div id="accountEmptyState" class="h-full flex items-center justify-center text-[#808080]">
+                        左のリストから選択するか、新規作成してください
+                    </div>
+                    <div id="accountFormContainer" class="hidden space-y-4">
+                        <table class="w-full">
+                            <tr>
+                                <td class="w-[80px] pb-2">ユーザーID:</td>
+                                <td class="pb-2"><input type="text" id="accUserId" class="win-inset w-full p-1 bg-white font-mono"></td>
+                            </tr>
+                            <tr>
+                                <td class="pb-2">パスワード:</td>
+                                <td class="pb-2"><input type="text" id="accPassword" class="win-inset w-full p-1 bg-white font-mono"></td>
+                            </tr>
+                            <tr>
+                                <td class="pb-2">権限(Role):</td>
+                                <td class="pb-2">
+                                    <select id="accRole" class="win-inset w-full p-1 bg-white font-mono">
+                                        <option value="user">一般ユーザー (user)</option>
+                                        <option value="admin">管理者 (admin)</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="p-2 bg-[#c0c0c0] border-t border-[#808080] flex justify-between items-center">
+                    <button id="btnDeleteAccount" class="win-btn px-4 py-1 text-[#ff0000] font-bold hidden">削除</button>
+                    <div class="flex-1"></div>
+                    <button id="btnSaveAccount" class="win-btn px-6 py-1 font-bold hidden">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmDialog" class="hidden fixed inset-0 z-[150] flex items-center justify-center dither-overlay">
+        <div class="win-outset w-80 shadow-[2px_2px_10px_rgba(0,0,0,0.5)]">
+            <div class="win-titlebar">確認</div>
+            <div class="p-4 bg-[#c0c0c0] text-[12px] font-bold flex gap-4">
+                <i class="ph-fill ph-warning-circle text-[32px] text-[#ffff00]"></i>
+                <div id="confirmMessage" class="pt-1 text-black"></div>
+            </div>
+            <div class="p-2 bg-[#c0c0c0] border-t border-[#808080] flex justify-end gap-2">
+                <button id="confirmYes" class="win-btn px-4 py-1 font-bold">はい(Y)</button>
+                <button id="confirmNo" class="win-btn px-4 py-1 font-bold">いいえ(N)</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, addDoc, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            let db, auth, currentUser = null;
+            
+            // データ状態管理
+            let globalAgendas = [];
+            let globalVotes = [];
+            
+            let editorDocsMap = {}; let selectedEditorId = null;
+            let agendasMap = {}; let selectedAgendaId = null;
+            let accountsMap = {}; let selectedAccountId = null;
+
+            // ダイアログコールバック
+            let confirmCallback = null;
+
+            // 時計
+            const updateClock = () => {
+                const now = new Date();
+                const pad = (n) => n.toString().padStart(2, '0');
+                const str = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} JST`;
+                document.getElementById('systemClock').textContent = str;
+            };
+            setInterval(updateClock, 1000);
+            updateClock();
+
+            // アラート関数
+            const setAlert = (message, show = true, isSuccess = false) => {
+                const alertEl = document.getElementById('statusAlert');
+                const alertMsg = document.getElementById('alertMessage');
+                if (show) {
+                    alertEl.classList.remove('hidden');
+                    alertEl.className = `win-outset p-2 flex items-start gap-2 ${isSuccess ? 'bg-[#00ff00] border-l-4 border-[#008000]' : 'bg-[#ffff00] border-l-4 border-[#808000]'} text-black mb-2`;
+                    alertMsg.textContent = message;
+                    if(isSuccess) setTimeout(() => alertEl.classList.add('hidden'), 3000);
+                } else {
+                    alertEl.classList.add('hidden');
+                }
+            };
+
+            // 確認ダイアログ
+            const showConfirm = (msg, onYes) => {
+                document.getElementById('confirmMessage').textContent = msg;
+                document.getElementById('confirmDialog').classList.remove('hidden');
+                confirmCallback = onYes;
+            };
+            document.getElementById('confirmNo').addEventListener('click', () => {
+                document.getElementById('confirmDialog').classList.add('hidden');
+                confirmCallback = null;
+            });
+            document.getElementById('confirmYes').addEventListener('click', () => {
+                document.getElementById('confirmDialog').classList.add('hidden');
+                if(confirmCallback) confirmCallback();
+            });
+
+            // タブ切り替え制御
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const targetBtn = e.currentTarget;
+                    const targetId = targetBtn.dataset.target;
+                    
+                    // ボタンの見た目更新
+                    document.querySelectorAll('.tab-btn').forEach(b => {
+                        b.className = "tab-btn win-btn px-2 py-0.5 font-bold flex items-center gap-1 text-xs hover:bg-[#ffffff]";
+                    });
+                    targetBtn.className = "tab-btn active-tab px-2 py-0.5 font-bold flex items-center gap-1 text-xs";
+
+                    // コンテンツ切り替え
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden', 'block'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('block'));
+                    
+                    const targetContent = document.getElementById(`tab-${targetId}`);
+                    targetContent.classList.remove('hidden');
+                    
+                    // 特定のタブが選ばれたときの再描画（ビューアーなど）
+                    if(targetId === 'viewer') updateViewerUI();
+                });
+            });
+
+            // Firebase 初期化
+            const initFirebase = async () => {
+                try {
+                    const firebaseConfig = {
+                        apiKey: "AIzaSyCNbylYM-96elHEwq122riR48ZRc-mU_B8",
+                        authDomain: "v-s-system.firebaseapp.com",
+                        projectId: "v-s-system",
+                        storageBucket: "v-s-system.firebasestorage.app",
+                        messagingSenderId: "639176585909",
+                        appId: "1:639176585909:web:2abf53f9f0cc37fce244fc"
+                    };
+                    const app = initializeApp(firebaseConfig);
+                    auth = getAuth(app);
+                    db = getFirestore(app);
+
+                    setAlert("認証試行中...", true);
+                    await signInAnonymously(auth);
+
+                    onAuthStateChanged(auth, (user) => {
+                        currentUser = user;
+                        if (user) {
+                            setAlert("オンライン/同期完了", true, true);
+                            checkSessionLogin();
+                        } else {
+                            setAlert("認証に失敗しました。再読み込みしてください。", true);
+                        }
+                    });
+                } catch (error) {
+                    setAlert(`接続エラー: ${error.message}`, true);
+                }
+            };
+
+            const checkSessionLogin = () => {
+                const role = sessionStorage.getItem('voteSys_role');
+                const user = sessionStorage.getItem('voteSys_userId');
+                if (role === 'admin') {
+                    showMainContent(user);
+                    startGlobalSync();
+                } else {
+                    document.getElementById('loginOverlay').classList.remove('hidden');
+                    document.getElementById('mainContent').classList.add('hidden');
+                    if (role === 'user') {
+                        document.getElementById('loginErrorMsg').textContent = "アクセス権限がありません。";
+                        sessionStorage.removeItem('voteSys_role');
+                    }
+                }
+            };
+
+            // ログイン処理
+            document.getElementById('btnLoginSubmit').addEventListener('click', async () => {
+                const idStr = document.getElementById('loginUserId').value.trim();
+                const passStr = document.getElementById('loginPassword').value.trim();
+                const err = document.getElementById('loginErrorMsg');
+                const load = document.getElementById('loadingMsg');
+                const btn = document.getElementById('btnLoginSubmit');
+
+                err.textContent = "";
+                if (!idStr || !passStr) return err.textContent = "IDとパスワードを入力してください。";
+
+                btn.disabled = true; load.classList.remove('hidden');
+
+                try {
+                    const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'accounts'));
+                    let acc = null;
+                    snap.forEach(d => { if(d.data().userId === idStr) acc = d.data(); });
+
+                    if (snap.empty && idStr === 'admin' && passStr === 'admin') {
+                        acc = { userId: 'admin', password: 'admin', role: 'admin' };
+                    }
+
+                    if (acc && acc.password === passStr && acc.role === 'admin') {
+                        sessionStorage.setItem('voteSys_role', 'admin');
+                        sessionStorage.setItem('voteSys_userId', acc.userId);
+                        showMainContent(acc.userId);
+                        startGlobalSync();
+                    } else {
+                        err.textContent = "ID/パスワードの誤りか、管理者権限がありません。";
+                    }
+                } catch (e) {
+                    err.textContent = "エラーが発生しました。";
+                } finally {
+                    btn.disabled = false; load.classList.add('hidden');
+                }
+            });
+
+            const showMainContent = (userId) => {
+                document.getElementById('loginOverlay').classList.add('hidden');
+                document.getElementById('mainContent').classList.remove('hidden');
+                document.getElementById('currentUserDisplay').textContent = `Admin: ${userId}`;
+            };
+
+            document.getElementById('btnLogout').addEventListener('click', () => {
+                sessionStorage.clear(); location.reload();
+            });
+
+            // 統合同期処理 (全コレクションを監視)
+            const startGlobalSync = () => {
+                if (!currentUser) return;
+                
+                // 1. 議題 (Agendas) の同期
+                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'agendas'), (snap) => {
+                    globalAgendas = []; agendasMap = {};
+                    snap.forEach(d => {
+                        const data = d.data();
+                        globalAgendas.push({ id: d.id, ...data });
+                        agendasMap[d.id] = data;
+                    });
+                    globalAgendas.sort((a,b) => (a.number||0) - (b.number||0));
+                    
+                    updateAgendaUI();
+                    updateEditorUI();
+                    updateViewerUI();
+                });
+
+                // 2. 投票結果 (Votes) の同期
+                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'votes'), (snap) => {
+                    globalVotes = []; editorDocsMap = {};
+                    snap.forEach(d => {
+                        const data = d.data();
+                        globalVotes.push({ id: d.id, ...data });
+                        editorDocsMap[d.id] = data;
+                    });
+                    
+                    updateEditorList();
+                    updateViewerUI();
+                });
+
+                // 3. アカウント (Accounts) の同期
+                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'accounts'), (snap) => {
+                    accountsMap = {};
+                    const ul = document.getElementById('accountList');
+                    ul.innerHTML = '';
+                    snap.forEach(d => {
+                        const data = d.data();
+                        accountsMap[d.id] = data;
+                        const li = document.createElement('li');
+                        li.className = 'list-item truncate' + (selectedAccountId === d.id ? ' selected' : '');
+                        li.textContent = `[${data.role}] ${data.userId}`;
+                        li.onclick = () => selectAccount(d.id, li);
+                        ul.appendChild(li);
+                    });
+                });
+            };
+
+            /* ================= ビューアー ロジック ================= */
+            const updateViewerUI = () => {
+                if(document.getElementById('tab-viewer').classList.contains('hidden')) return;
+                
+                const container = document.getElementById('viewerChartsContainer');
+                document.getElementById('viewerClassCount').textContent = globalVotes.length;
+                
+                let totalVoteSum = 0;
+                let html = '';
+
+                globalAgendas.forEach(ag => {
+                    const n = ag.number;
+                    let yes = 0, no = 0;
+                    globalVotes.forEach(v => {
+                        if(v[`agenda${n}`]) {
+                            yes += parseInt(v[`agenda${n}`].yes || 0);
+                            no += parseInt(v[`agenda${n}`].no || 0);
+                        }
+                    });
+                    
+                    totalVoteSum += (yes + no);
+                    const sum = yes + no;
+                    const yesPct = sum > 0 ? Math.round((yes/sum)*100) : 0;
+                    const noPct = sum > 0 ? Math.round((no/sum)*100) : 0;
+
+                    html += `
+                    <div class="win-inset bg-white p-3">
+                        <div class="font-bold text-[#000080] mb-2 border-b border-[#c0c0c0] pb-1">第${n}号議案: ${ag.theme || ''}</div>
+                        <div class="flex gap-4 items-center">
+                            <div class="flex-1">
+                                <div class="flex justify-between text-[11px] font-bold mb-1">
+                                    <span class="text-blue-600">賛成: ${yes} (${yesPct}%)</span>
+                                    <span class="text-red-600">反対: ${no} (${noPct}%)</span>
+                                </div>
+                                <div class="w-full h-4 bg-[#dfdfdf] win-inset flex">
+                                    <div class="h-full bg-blue-500" style="width: ${yesPct}%"></div>
+                                    <div class="h-full bg-red-500" style="width: ${noPct}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+
+                document.getElementById('viewerTotalVotes').textContent = totalVoteSum;
+                container.innerHTML = globalAgendas.length > 0 ? html : '<div class="text-center text-[#808080]">議題データがありません</div>';
+            };
+
+            /* ================= エディタ ロジック ================= */
+            const updateEditorList = () => {
+                const ul = document.getElementById('editorDataList');
+                ul.innerHTML = '';
+                document.getElementById('editorTotalCount').textContent = globalVotes.length;
+                
+                globalVotes.forEach(v => {
+                    const li = document.createElement('li');
+                    li.className = 'list-item truncate' + (selectedEditorId === v.id ? ' selected' : '');
+                    li.textContent = `[${v.step === 2 ? '完' : '途'}] ${v.className || '未設定'}`;
+                    li.onclick = () => selectEditorDoc(v.id, li);
+                    ul.appendChild(li);
+                });
+            };
+
+            const selectEditorDoc = (id, li) => {
+                selectedEditorId = id;
+                document.querySelectorAll('#editorDataList .list-item').forEach(el => el.classList.remove('selected'));
+                if(li) li.classList.add('selected');
+
+                document.getElementById('editorEmptyState').classList.add('hidden');
+                const form = document.getElementById('editorFormContainer');
+                form.classList.remove('hidden');
+                
+                const data = editorDocsMap[id];
+                document.getElementById('editClassName').value = data.className || '';
+                document.getElementById('editTotalStudents').value = data.totalStudents || 0;
+                document.getElementById('editAttendedStudents').value = data.attendedStudents || 0;
+
+                const agContainer = document.getElementById('editorAgendasContainer');
+                agContainer.innerHTML = '';
+                globalAgendas.forEach(ag => {
+                    const n = ag.number;
+                    const res = data[`agenda${n}`] || {yes:0, no:0};
+                    agContainer.innerHTML += `
+                        <div class="win-inset bg-[#dfdfdf] p-2 flex gap-4 items-center">
+                            <span class="w-[60px] truncate">第${n}号:</span>
+                            <label class="flex items-center gap-1">賛成<input type="number" id="editAg${n}Yes" class="win-inset w-12 p-0.5 text-right" value="${res.yes}"></label>
+                            <label class="flex items-center gap-1">反対<input type="number" id="editAg${n}No" class="win-inset w-12 p-0.5 text-right" value="${res.no}"></label>
+                        </div>`;
+                });
+
+                document.getElementById('btnDeleteEditor').disabled = false;
+                document.getElementById('btnSaveEditor').disabled = false;
+            };
+
+            document.getElementById('btnSaveEditor').addEventListener('click', async () => {
+                if(!selectedEditorId) return;
+                const updateData = {
+                    className: document.getElementById('editClassName').value,
+                    totalStudents: parseInt(document.getElementById('editTotalStudents').value||0),
+                    attendedStudents: parseInt(document.getElementById('editAttendedStudents').value||0)
+                };
+                globalAgendas.forEach(ag => {
+                    const n = ag.number;
+                    const yesEl = document.getElementById(`editAg${n}Yes`);
+                    if(yesEl) updateData[`agenda${n}`] = { yes: parseInt(yesEl.value||0), no: parseInt(document.getElementById(`editAg${n}No`).value||0) };
+                });
+
+                try {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'votes', selectedEditorId), updateData);
+                    setAlert("保存しました", true, true);
+                } catch(e) { setAlert("保存失敗", true); }
+            });
+
+            document.getElementById('btnDeleteEditor').addEventListener('click', () => {
+                showConfirm("選択した投票データを削除しますか？", async () => {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'votes', selectedEditorId));
+                    selectedEditorId = null;
+                    document.getElementById('editorFormContainer').classList.add('hidden');
+                    document.getElementById('editorEmptyState').classList.remove('hidden');
+                    document.getElementById('btnDeleteEditor').disabled = true;
+                    document.getElementById('btnSaveEditor').disabled = true;
+                    setAlert("削除しました", true, true);
+                });
+            });
+
+            /* ================= 議題管理 ロジック ================= */
+            const updateAgendaUI = () => {
+                const ul = document.getElementById('agendaList');
+                ul.innerHTML = '';
+                globalAgendas.forEach(ag => {
+                    const li = document.createElement('li');
+                    li.className = 'list-item truncate' + (selectedAgendaId === ag.id ? ' selected' : '');
+                    li.textContent = `第${ag.number}号: ${ag.theme}`;
+                    li.onclick = () => selectAgenda(ag.id, li);
+                    ul.appendChild(li);
+                });
+            };
+
+            const selectAgenda = (id, li) => {
+                selectedAgendaId = id;
+                document.querySelectorAll('#agendaList .list-item').forEach(el => el.classList.remove('selected'));
+                if(li) li.classList.add('selected');
+
+                document.getElementById('agendaEmptyState').classList.add('hidden');
+                document.getElementById('agendaFormContainer').classList.remove('hidden');
+                
+                if(id === 'new') {
+                    document.getElementById('agendaNumber').value = globalAgendas.length + 1;
+                    document.getElementById('agendaTheme').value = '';
+                    document.getElementById('agendaDetails').value = '';
+                } else {
+                    const data = agendasMap[id];
+                    document.getElementById('agendaNumber').value = data.number || '';
+                    document.getElementById('agendaTheme').value = data.theme || '';
+                    document.getElementById('agendaDetails').value = data.details || '';
+                }
+                
+                document.getElementById('btnSaveAgenda').classList.remove('hidden');
+                if(id !== 'new') document.getElementById('btnDeleteAgenda').classList.remove('hidden');
+                else document.getElementById('btnDeleteAgenda').classList.add('hidden');
+            };
+
+            document.getElementById('btnNewAgenda').addEventListener('click', () => selectAgenda('new', null));
+
+            document.getElementById('btnSaveAgenda').addEventListener('click', async () => {
+                const data = {
+                    number: parseInt(document.getElementById('agendaNumber').value || 0),
+                    theme: document.getElementById('agendaTheme').value,
+                    details: document.getElementById('agendaDetails').value
+                };
+                try {
+                    if(selectedAgendaId === 'new') await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'agendas'), data);
+                    else await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'agendas', selectedAgendaId), data);
+                    setAlert("議題を保存しました", true, true);
+                } catch(e) { setAlert("保存失敗", true); }
+            });
+
+            document.getElementById('btnDeleteAgenda').addEventListener('click', () => {
+                showConfirm("議題を削除しますか？", async () => {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'agendas', selectedAgendaId));
+                    selectedAgendaId = null;
+                    document.getElementById('agendaFormContainer').classList.add('hidden');
+                    document.getElementById('agendaEmptyState').classList.remove('hidden');
+                    document.getElementById('btnSaveAgenda').classList.add('hidden');
+                    document.getElementById('btnDeleteAgenda').classList.add('hidden');
+                    setAlert("削除しました", true, true);
+                });
+            });
+
+            /* ================= アカウント管理 ロジック ================= */
+            const selectAccount = (id, li) => {
+                selectedAccountId = id;
+                document.querySelectorAll('#accountList .list-item').forEach(el => el.classList.remove('selected'));
+                if(li) li.classList.add('selected');
+
+                document.getElementById('accountEmptyState').classList.add('hidden');
+                document.getElementById('accountFormContainer').classList.remove('hidden');
+                
+                if(id === 'new') {
+                    document.getElementById('accUserId').value = '';
+                    document.getElementById('accPassword').value = '';
+                    document.getElementById('accRole').value = 'user';
+                } else {
+                    const data = accountsMap[id];
+                    document.getElementById('accUserId').value = data.userId || '';
+                    document.getElementById('accPassword').value = data.password || '';
+                    document.getElementById('accRole').value = data.role || 'user';
+                }
+
+                document.getElementById('btnSaveAccount').classList.remove('hidden');
+                if(id !== 'new') document.getElementById('btnDeleteAccount').classList.remove('hidden');
+                else document.getElementById('btnDeleteAccount').classList.add('hidden');
+            };
+
+            document.getElementById('btnNewAccount').addEventListener('click', () => selectAccount('new', null));
+
+            document.getElementById('btnSaveAccount').addEventListener('click', async () => {
+                const uid = document.getElementById('accUserId').value.trim();
+                const pw = document.getElementById('accPassword').value.trim();
+                const r = document.getElementById('accRole').value;
+                if(!uid || !pw) return setAlert("IDとパスワードは必須です", true);
+
+                const data = { userId: uid, password: pw, role: r };
+                try {
+                    if(selectedAccountId === 'new') await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'accounts'), data);
+                    else await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'accounts', selectedAccountId), data);
+                    setAlert("アカウントを保存しました", true, true);
+                } catch(e) { setAlert("保存失敗", true); }
+            });
+
+            document.getElementById('btnDeleteAccount').addEventListener('click', () => {
+                showConfirm("アカウントを削除しますか？", async () => {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'accounts', selectedAccountId));
+                    selectedAccountId = null;
+                    document.getElementById('accountFormContainer').classList.add('hidden');
+                    document.getElementById('accountEmptyState').classList.remove('hidden');
+                    document.getElementById('btnSaveAccount').classList.add('hidden');
+                    document.getElementById('btnDeleteAccount').classList.add('hidden');
+                    setAlert("削除しました", true, true);
+                });
+            });
+
+            // 起動
+            initFirebase();
+        });
+    </script>
+</body>
+</html>
